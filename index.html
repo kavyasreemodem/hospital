@@ -1,0 +1,4875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MediTrack - Hospital Critical Resources Monitoring Dashboard. Real-time hospital inventory tracking, smart alerts, and resource analytics.">
+  <title>MediTrack — Hospital Critical Resources Monitoring Dashboard</title>
+  <style>
+    /* ==========================================================================
+       1. CSS VARIABLES & THEMES
+       ========================================================================== */
+    :root {
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      
+      /* Light Theme (Default: Medical Clean Navy & Light Blue) */
+      --bg-body: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-card-subtle: #f8fafc;
+      --bg-sidebar: #0a192f;
+      --bg-sidebar-hover: #172a46;
+      --bg-sidebar-active: #1e3a8a;
+      
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --text-sidebar: #e2e8f0;
+      --text-sidebar-muted: #94a3b8;
+      
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-subtle: #e0f2fe;
+      --primary-border: #bae6fd;
+      
+      --accent: #0d9488;
+      --accent-subtle: #ccfbf1;
+      
+      /* Status Indicator Colors */
+      --status-green: #10b981;
+      --status-green-bg: #ecfdf5;
+      --status-green-border: #a7f3d0;
+      --status-green-text: #065f46;
+      
+      --status-yellow: #f59e0b;
+      --status-yellow-bg: #fffbeb;
+      --status-yellow-border: #fde68a;
+      --status-yellow-text: #92400e;
+      
+      --status-red: #ef4444;
+      --status-red-bg: #fef2f2;
+      --status-red-border: #fecaca;
+      --status-red-text: #991b1b;
+      
+      --status-gray: #64748b;
+      --status-gray-bg: #f1f5f9;
+      --status-gray-border: #cbd5e1;
+      --status-gray-text: #334155;
+      
+      --border-color: #e2e8f0;
+      --border-subtle: #f1f5f9;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-full: 9999px;
+      
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --topbar-height: 64px;
+      --sidebar-width: 260px;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #070d19;
+      --bg-card: #0f1c34;
+      --bg-card-subtle: #142442;
+      --bg-sidebar: #050b14;
+      --bg-sidebar-hover: #0e1d38;
+      --bg-sidebar-active: #1d4ed8;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-light: #64748b;
+      --text-sidebar: #f1f5f9;
+      --text-sidebar-muted: #64748b;
+      
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --primary-subtle: rgba(56, 189, 248, 0.15);
+      --primary-border: #0369a1;
+      
+      --accent: #2dd4bf;
+      --accent-subtle: rgba(45, 212, 191, 0.15);
+      
+      --status-green: #34d399;
+      --status-green-bg: rgba(16, 185, 129, 0.18);
+      --status-green-border: rgba(16, 185, 129, 0.35);
+      --status-green-text: #a7f3d0;
+      
+      --status-yellow: #fbbf24;
+      --status-yellow-bg: rgba(245, 158, 11, 0.18);
+      --status-yellow-border: rgba(245, 158, 11, 0.35);
+      --status-yellow-text: #fde68a;
+      
+      --status-red: #f87171;
+      --status-red-bg: rgba(239, 68, 68, 0.2);
+      --status-red-border: rgba(239, 68, 68, 0.4);
+      --status-red-text: #fecaca;
+      
+      --status-gray: #94a3b8;
+      --status-gray-bg: rgba(100, 116, 139, 0.2);
+      --status-gray-border: rgba(100, 116, 139, 0.35);
+      --status-gray-text: #cbd5e1;
+      
+      --border-color: #1e293b;
+      --border-subtle: #142442;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+    }
+
+    /* ==========================================================================
+       2. BASE & RESET STYLES
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.5;
+      font-size: 14px;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: var(--transition);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* SVG Icon Helpers */
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .icon svg {
+      width: 100%;
+      height: 100%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ==========================================================================
+       3. APP SHELL LAYOUT
+       ========================================================================== */
+    #app-container {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* Sidebar Navigation */
+    #sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--bg-sidebar);
+      color: var(--text-sidebar);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logo-pulse {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #0284c7, #0d9488);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(2, 132, 199, 0.4);
+    }
+
+    .logo-pulse svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .logo-text h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .logo-text p {
+      font-size: 0.72rem;
+      color: var(--text-sidebar-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-sidebar-muted);
+      padding: 12px 14px 6px;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      color: var(--text-sidebar);
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: var(--transition);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .nav-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-item:hover {
+      background-color: var(--bg-sidebar-hover);
+      color: #ffffff;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, #0284c7, #0369a1);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+    }
+
+    .nav-badge {
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      background-color: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+
+    .nav-badge.danger {
+      background-color: var(--status-red);
+      color: #ffffff;
+      animation: pulse-badge 2s infinite;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.05); }
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .fictional-tag {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+    }
+
+    /* Main Content Wrapper */
+    #main-wrapper {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Top Navigation Bar */
+    #topbar {
+      height: var(--topbar-height);
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+    }
+
+    .topbar-title h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hospital-pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background-color: var(--primary-subtle);
+      color: var(--primary);
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--primary-border);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--status-green);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 6px var(--status-green);
+      animation: blink 2s infinite ease-in-out;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .clock-display {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--bg-card-subtle);
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topbar-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .topbar-btn:hover {
+      background-color: var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    .bell-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--status-red);
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg-card);
+    }
+
+    .btn-quick-add {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.84rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-quick-add:hover {
+      background: linear-gradient(135deg, #0369a1, #075985);
+      transform: translateY(-1px);
+    }
+
+    /* Content Area */
+    #content-area {
+      padding: 24px;
+      flex: 1;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Top Disclaimer Banner */
+    .disclaimer-banner {
+      background: linear-gradient(90deg, #eff6ff, #f0fdf4);
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid #0284c7;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: #1e3a8a;
+    }
+
+    [data-theme="dark"] .disclaimer-banner {
+      background: linear-gradient(90deg, #0f172a, #062428);
+      border-color: #1e3a8a;
+      border-left-color: #38bdf8;
+      color: #93c5fd;
+    }
+
+    .disclaimer-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* View Sections (Single-page switching) */
+    .view-section {
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Page Header in View */
+    .view-header {
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .view-title-group h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .view-title-group p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ==========================================================================
+       4. SUMMARY CARDS (DASHBOARD)
+       ========================================================================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+      border-color: var(--primary-border);
+    }
+
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--card-accent, var(--primary));
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background-color: var(--card-bg-subtle, var(--primary-subtle));
+      color: var(--card-accent, var(--primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-value {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .stat-value small {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .stat-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .stat-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.73rem;
+    }
+
+    /* Dashboard Widgets Section */
+    .dashboard-two-col {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .dashboard-three-col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .dash-widget {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .widget-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .widget-action-link {
+      font-size: 0.78rem;
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .widget-action-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Quick Action Buttons Grid */
+    .quick-actions-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .quick-act-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .quick-act-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary-subtle);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .quick-act-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card-subtle);
+      color: var(--primary);
+    }
+
+    /* Urgent Shortage Items in Dashboard */
+    .urgent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .urgent-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background-color: var(--status-red-bg);
+      border: 1px solid var(--status-red-border);
+      gap: 12px;
+    }
+
+    .urgent-item.warning {
+      background-color: var(--status-yellow-bg);
+      border-color: var(--status-yellow-border);
+    }
+
+    .urgent-item-info h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .urgent-item-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .urgent-item-action {
+      flex-shrink: 0;
+    }
+
+    .btn-sm-action {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-sm-action:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* ==========================================================================
+       5. RESOURCE INVENTORY TABLE & CONTROLS
+       ========================================================================== */
+    .table-container {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .table-controls {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background-color: var(--bg-card);
+    }
+
+    .search-filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      min-width: 260px;
+      flex: 1;
+      max-width: 380px;
+    }
+
+    .search-input-wrapper input {
+      width: 100%;
+      height: 38px;
+      padding: 8px 12px 8px 36px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card-subtle);
+      color: var(--text-main);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input-wrapper input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+      background-color: var(--bg-card);
+    }
+
+    .search-icon-inside {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .select-filter {
+      height: 38px;
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card-subtle);
+      color: var(--text-main);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .select-filter:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-clear-filters {
+      height: 38px;
+      padding: 0 14px;
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-clear-filters:hover {
+      background-color: var(--bg-card-subtle);
+      color: var(--text-main);
+    }
+
+    .table-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .custom-table th {
+      background-color: var(--bg-card-subtle);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    .custom-table th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .custom-table th.sortable:hover {
+      color: var(--text-main);
+    }
+
+    .custom-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 0.86rem;
+      vertical-align: middle;
+    }
+
+    .custom-table tbody tr {
+      transition: background-color 0.15s ease;
+    }
+
+    .custom-table tbody tr:hover {
+      background-color: var(--bg-card-subtle);
+    }
+
+    .resource-cell {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .resource-name {
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .resource-subinfo {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      font-size: 0.73rem;
+      font-weight: 600;
+      background-color: var(--bg-card-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .status-badge.green {
+      background-color: var(--status-green-bg);
+      color: var(--status-green-text);
+      border: 1px solid var(--status-green-border);
+    }
+
+    .status-badge.yellow {
+      background-color: var(--status-yellow-bg);
+      color: var(--status-yellow-text);
+      border: 1px solid var(--status-yellow-border);
+    }
+
+    .status-badge.red {
+      background-color: var(--status-red-bg);
+      color: var(--status-red-text);
+      border: 1px solid var(--status-red-border);
+    }
+
+    .status-badge.gray {
+      background-color: var(--status-gray-bg);
+      color: var(--status-gray-text);
+      border: 1px solid var(--status-gray-border);
+    }
+
+    /* Quantity Inline Adjuster */
+    .qty-adjuster {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qty-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .qty-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .qty-val {
+      font-weight: 700;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .action-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-icon-table {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+    }
+
+    .btn-icon-table:hover {
+      background-color: var(--primary-subtle);
+      color: var(--primary);
+      border-color: var(--primary-border);
+    }
+
+    .btn-icon-table.delete:hover {
+      background-color: var(--status-red-bg);
+      color: var(--status-red);
+      border-color: var(--status-red-border);
+    }
+
+    .table-footer {
+      padding: 12px 20px;
+      background-color: var(--bg-card-subtle);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      padding: 50px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 12px;
+      color: var(--text-light);
+    }
+
+    /* ==========================================================================
+       6. DEDICATED ICU BEDS MATRIX & WARDS
+       ========================================================================== */
+    .bed-matrix-container {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .bed-matrix-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 16px;
+    }
+
+    .bed-legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.8rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+
+    .bed-grid-30 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+    }
+
+    .bed-card {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      background-color: var(--bg-card-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .bed-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .bed-card.available {
+      border-color: var(--status-green-border);
+      background-color: var(--status-green-bg);
+      color: var(--status-green-text);
+    }
+
+    .bed-card.occupied {
+      border-color: #93c5fd;
+      background-color: #eff6ff;
+      color: #1e40af;
+    }
+
+    [data-theme="dark"] .bed-card.occupied {
+      background-color: rgba(30, 64, 175, 0.25);
+      border-color: rgba(30, 64, 175, 0.5);
+      color: #93c5fd;
+    }
+
+    .bed-card.maintenance {
+      border-color: var(--status-gray-border);
+      background-color: var(--status-gray-bg);
+      color: var(--status-gray-text);
+      opacity: 0.75;
+    }
+
+    .bed-number {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 4px 0 2px;
+    }
+
+    .bed-status-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .bed-patient-code {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ==========================================================================
+       7. BLOOD BANK 8-GROUP GRID
+       ========================================================================== */
+    .blood-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .blood-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .blood-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .blood-type-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35);
+    }
+
+    .blood-progress-bar {
+      height: 8px;
+      background: var(--bg-card-subtle);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin: 12px 0 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .blood-progress-fill {
+      height: 100%;
+      background: #ef4444;
+      border-radius: var(--radius-full);
+      transition: width 0.4s ease;
+    }
+
+    /* ==========================================================================
+       8. ALERTS & NOTIFICATIONS
+       ========================================================================== */
+    .alerts-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .alert-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 5px solid var(--status-red);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .alert-card.warning {
+      border-left-color: var(--status-yellow);
+    }
+
+    .alert-card.maintenance {
+      border-left-color: var(--status-gray);
+    }
+
+    .alert-card.acknowledged {
+      opacity: 0.8;
+      background-color: var(--bg-card-subtle);
+    }
+
+    .alert-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .alert-icon-box {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .alert-icon-box.red {
+      background-color: var(--status-red-bg);
+      color: var(--status-red);
+    }
+
+    .alert-icon-box.yellow {
+      background-color: var(--status-yellow-bg);
+      color: var(--status-yellow);
+    }
+
+    .alert-icon-box.gray {
+      background-color: var(--status-gray-bg);
+      color: var(--status-gray);
+    }
+
+    .alert-info h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert-info p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .alert-recommendation {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .alert-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-ack {
+      padding: 6px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .btn-ack:hover {
+      background-color: var(--bg-card-subtle);
+    }
+
+    .btn-ack.is-acked {
+      background-color: var(--status-green-bg);
+      color: var(--status-green-text);
+      border-color: var(--status-green-border);
+    }
+
+    /* ==========================================================================
+       9. VISUAL ANALYTICS (PURE SVG / CSS CHARTS)
+       ========================================================================== */
+    .chart-container {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .chart-header h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .chart-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+      position: relative;
+    }
+
+    /* Custom SVG Bar Chart */
+    .bar-chart-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bar-label-group {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .bar-track {
+      height: 14px;
+      background-color: var(--bg-card-subtle);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* SVG Donut Chart */
+    .donut-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .donut-svg-box {
+      position: relative;
+      width: 170px;
+      height: 170px;
+    }
+
+    .donut-center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .donut-center-text .num {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    .donut-center-text .desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Blood Group Vertical Columns Chart */
+    .vertical-chart-wrap {
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 200px;
+      padding-top: 20px;
+      border-bottom: 2px solid var(--border-color);
+      gap: 8px;
+    }
+
+    .v-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      position: relative;
+    }
+
+    .v-bar {
+      width: 80%;
+      max-width: 36px;
+      background: linear-gradient(180deg, #ef4444, #b91c1c);
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      transition: height 0.5s ease;
+      min-height: 6px;
+    }
+
+    .v-bar.low {
+      background: linear-gradient(180deg, #f59e0b, #d97706);
+    }
+
+    .v-bar.critical {
+      background: linear-gradient(180deg, #dc2626, #991b1b);
+      animation: pulse-badge 1.8s infinite;
+    }
+
+    .v-label {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .v-val {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    /* ==========================================================================
+       10. SETTINGS & SYSTEM CONFIGURATION
+       ========================================================================== */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .settings-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .settings-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .settings-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .form-control {
+      width: 100%;
+      height: 40px;
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card-subtle);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+
+    /* Switch / Toggle */
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border-color);
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    /* ==========================================================================
+       11. MODAL DIALOGS
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(3px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlide {
+      from { transform: translateY(20px) scale(0.96); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-close-modal {
+      color: var(--text-muted);
+      padding: 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-close-modal:hover {
+      background-color: var(--bg-card-subtle);
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      background-color: var(--bg-card-subtle);
+    }
+
+    .btn-secondary {
+      padding: 9px 18px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.85rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border-subtle);
+    }
+
+    .btn-primary {
+      padding: 9px 18px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.85rem;
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-danger {
+      padding: 9px 18px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.85rem;
+      background: var(--status-red);
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    /* Form Grid */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* Notification Drawer */
+    #notif-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 380px;
+      max-width: 90vw;
+      background-color: var(--bg-card);
+      border-left: 1px solid var(--border-color);
+      box-shadow: var(--shadow-xl);
+      z-index: 1050;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    #notif-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Toast Container */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      min-width: 280px;
+      max-width: 380px;
+      animation: slideInRight 0.3s ease;
+    }
+
+    .toast.success { border-left-color: var(--status-green); }
+    .toast.error { border-left-color: var(--status-red); }
+    .toast.warning { border-left-color: var(--status-yellow); }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ==========================================================================
+       12. RESPONSIVE MEDIA QUERIES
+       ========================================================================== */
+    @media (max-width: 1024px) {
+      .dashboard-two-col {
+        grid-template-columns: 1fr;
+      }
+      .dashboard-three-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+      #sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      #main-wrapper {
+        margin-left: 0;
+      }
+      .mobile-menu-btn {
+        display: inline-flex;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .search-filter-group {
+        width: 100%;
+      }
+      .search-input-wrapper {
+        min-width: 100%;
+      }
+      #content-area {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Backdrop for Mobile -->
+  <div id="sidebar-overlay" onclick="toggleMobileSidebar()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:90;"></div>
+
+  <!-- Notification Drawer Backdrop -->
+  <div id="drawer-overlay" onclick="toggleNotifDrawer()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:1040;"></div>
+
+  <div id="app-container">
+    <!-- ====================================================================
+         SIDEBAR NAVIGATION
+         ==================================================================== -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-pulse">
+          <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="logo-text">
+          <h1>MediTrack</h1>
+          <p>Hospital Resource System</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-label">Core Operations</div>
+        
+        <div class="nav-item active" onclick="switchView('dashboard')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+            <span>Dashboard</span>
+          </div>
+        </div>
+
+        <div class="nav-item" onclick="switchView('inventory')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M20 7h-7m7 5h-7m7 5h-7M4 7h.01M4 12h.01M4 17h.01M7 7h.01M7 12h.01M7 17h.01"/></svg></span>
+            <span>Resource Inventory</span>
+          </div>
+          <span class="nav-badge" id="nav-inventory-count">0</span>
+        </div>
+
+        <div class="nav-label">Critical Categories</div>
+
+        <div class="nav-item" onclick="switchView('beds')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg></span>
+            <span>ICU Beds</span>
+          </div>
+          <span class="nav-badge" id="nav-icu-avail">0</span>
+        </div>
+
+        <div class="nav-item" onclick="switchView('oxygen')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M10 8h4M12 6v4M8 15h8"/></svg></span>
+            <span>Oxygen Equipment</span>
+          </div>
+          <span class="nav-badge" id="nav-o2-avail">0</span>
+        </div>
+
+        <div class="nav-item" onclick="switchView('ventilators')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></span>
+            <span>Ventilators</span>
+          </div>
+          <span class="nav-badge" id="nav-vent-avail">0</span>
+        </div>
+
+        <div class="nav-item" onclick="switchView('medicines')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>
+            <span>Medicines</span>
+          </div>
+        </div>
+
+        <div class="nav-item" onclick="switchView('blood')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>
+            <span>Blood Bank</span>
+          </div>
+        </div>
+
+        <div class="nav-label">Intelligence</div>
+
+        <div class="nav-item" onclick="switchView('alerts')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+            <span>Alerts & Shortages</span>
+          </div>
+          <span class="nav-badge danger" id="nav-alerts-badge">0</span>
+        </div>
+
+        <div class="nav-item" onclick="switchView('analytics')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></span>
+            <span>Visual Analytics</span>
+          </div>
+        </div>
+
+        <div class="nav-item" onclick="switchView('settings')">
+          <div class="nav-item-left">
+            <span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+            <span>Settings</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="fictional-tag">
+          Fictional Demo Environment<br>
+          <span style="opacity: 0.8; font-size: 0.65rem;">College Hackathon Edition</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ====================================================================
+         MAIN APPLICATION WRAPPER
+         ==================================================================== -->
+    <div id="main-wrapper">
+      <!-- TOP NAVIGATION BAR -->
+      <header id="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation">
+            <span class="icon"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></span>
+          </button>
+          
+          <div class="topbar-title">
+            <span class="hospital-pill">
+              <span class="live-dot"></span>
+              <span id="header-hospital-name">Apex Metro General Hospital</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="clock-display" id="live-clock">
+            <span class="icon" style="width: 14px; height: 14px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+            <span id="clock-text">09:30 AM</span>
+          </div>
+
+          <button class="btn-quick-add" onclick="openAddResourceModal()">
+            <span class="icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+            <span>Add Resource</span>
+          </button>
+
+          <button class="topbar-btn" onclick="toggleTheme()" title="Switch Light/Dark Theme" aria-label="Toggle theme">
+            <span class="icon" id="theme-toggle-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </span>
+          </button>
+
+          <button class="topbar-btn" onclick="toggleNotifDrawer()" title="View Stock Alerts" aria-label="Open notifications">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+            <span class="bell-count" id="header-bell-count">0</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- CONTENT VIEWS CONTAINER -->
+      <main id="content-area">
+        
+        <!-- Safety & Disclaimer Banner -->
+        <div class="disclaimer-banner" id="demo-banner">
+          <div class="disclaimer-text">
+            <span class="icon" style="color: #0284c7;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+            <span><strong>Fictional Demo Notice:</strong> All hospital inventory, bed assignments, and medical records displayed are simulated for demonstration. This application runs entirely in your browser using local storage.</span>
+          </div>
+          <button onclick="document.getElementById('demo-banner').style.display='none'" style="color: var(--text-muted); font-size: 1.1rem; line-height: 1;">&times;</button>
+        </div>
+
+        <!-- ==================================================================
+             VIEW 1: DASHBOARD OVERVIEW
+             ================================================================== -->
+        <section id="view-dashboard" class="view-section active">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>Command Center Overview</h2>
+              <p>Real-time status of critical ICU beds, life-support machines, and essential medical supplies.</p>
+            </div>
+            <div>
+              <button class="btn-secondary" onclick="exportDataJSON()" style="display: inline-flex; align-items: center; gap: 6px;">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                Export Report
+              </button>
+            </div>
+          </div>
+
+          <!-- 8 Summary Cards Required by Prompt -->
+          <div class="stats-grid">
+            <!-- 1. Total ICU Beds -->
+            <div class="stat-card" style="--card-accent: #0284c7;">
+              <div class="stat-header">
+                <span class="stat-label">Total ICU Beds</span>
+                <div class="stat-icon"><span class="icon"><svg viewBox="0 0 24 24"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg></span></div>
+              </div>
+              <div class="stat-value" id="card-total-icu">30 <small>Capacity</small></div>
+              <div class="stat-footer">
+                <span>Total Licensed Units</span>
+                <span class="stat-status-pill" style="background:var(--primary-subtle); color:var(--primary);">ICU Ward A & B</span>
+              </div>
+            </div>
+
+            <!-- 2. Available ICU Beds -->
+            <div class="stat-card" style="--card-accent: #10b981;">
+              <div class="stat-header">
+                <span class="stat-label">Available ICU Beds</span>
+                <div class="stat-icon" style="background: var(--status-green-bg); color: var(--status-green);"><span class="icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></div>
+              </div>
+              <div class="stat-value" id="card-avail-icu">12 <small>Beds Ready</small></div>
+              <div class="stat-footer">
+                <span id="card-avail-icu-pct">40% Available</span>
+                <span class="stat-status-pill" id="card-icu-status-pill" style="background:var(--status-green-bg); color:var(--status-green-text);">Sufficient</span>
+              </div>
+            </div>
+
+            <!-- 3. Occupied ICU Beds -->
+            <div class="stat-card" style="--card-accent: #6366f1;">
+              <div class="stat-header">
+                <span class="stat-label">Occupied ICU Beds</span>
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;"><span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span></div>
+              </div>
+              <div class="stat-value" id="card-occupied-icu">18 <small>Admitted</small></div>
+              <div class="stat-footer">
+                <span id="card-occupied-icu-pct">60% Occupancy</span>
+                <span class="stat-status-pill" style="background:rgba(99, 102, 241, 0.15); color:#6366f1;">Active Care</span>
+              </div>
+            </div>
+
+            <!-- 4. Available Oxygen Equipment -->
+            <div class="stat-card" style="--card-accent: #0d9488;">
+              <div class="stat-header">
+                <span class="stat-label">Oxygen Equipment</span>
+                <div class="stat-icon" style="background: var(--accent-subtle); color: var(--accent);"><span class="icon"><svg viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M10 8h4M12 6v4M8 15h8"/></svg></span></div>
+              </div>
+              <div class="stat-value" id="card-avail-o2">33 <small>Avail Units</small></div>
+              <div class="stat-footer">
+                <span id="card-o2-subtext">Cylinders & Concentrators</span>
+                <span class="stat-status-pill" id="card-o2-pill" style="background:var(--status-yellow-bg); color:var(--status-yellow-text);">2 Items Low</span>
+              </div>
+            </div>
+
+            <!-- 5. Available Ventilators -->
+            <div class="stat-card" style="--card-accent: #f59e0b;">
+              <div class="stat-header">
+                <span class="stat-label">Available Ventilators</span>
+                <div class="stat-icon" style="background: var(--status-yellow-bg); color: var(--status-yellow);"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/></svg></span></div>
+              </div>
+              <div class="stat-value" id="card-avail-vent">11 <small>/ 27 Total</small></div>
+              <div class="stat-footer">
+                <span id="card-vent-maint">4 in Maintenance</span>
+                <span class="stat-status-pill" id="card-vent-pill" style="background:var(--status-yellow-bg); color:var(--status-yellow-text);">Alert</span>
+              </div>
+            </div>
+
+            <!-- 6. Total Medicine Stock -->
+            <div class="stat-card" style="--card-accent: #8b5cf6;">
+              <div class="stat-header">
+                <span class="stat-label">Medicine Stock</span>
+                <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;"><span class="icon"><svg viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span></div>
+              </div>
+              <div class="stat-value" id="card-total-meds">242 <small>Units</small></div>
+              <div class="stat-footer">
+                <span id="card-meds-subtext">7 Essential Formulations</span>
+                <span class="stat-status-pill" id="card-meds-pill" style="background:var(--status-red-bg); color:var(--status-red-text);">1 Expired</span>
+              </div>
+            </div>
+
+            <!-- 7. Available Blood Units -->
+            <div class="stat-card" style="--card-accent: #ef4444;">
+              <div class="stat-header">
+                <span class="stat-label">Available Blood Bank</span>
+                <div class="stat-icon" style="background: var(--status-red-bg); color: var(--status-red);"><span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span></div>
+              </div>
+              <div class="stat-value" id="card-total-blood">111 <small>Units</small></div>
+              <div class="stat-footer">
+                <span>8 Standard Types</span>
+                <span class="stat-status-pill" id="card-blood-pill" style="background:var(--status-red-bg); color:var(--status-red-text);">O- Shortage</span>
+              </div>
+            </div>
+
+            <!-- 8. Active Alerts Counter -->
+            <div class="stat-card" style="--card-accent: #dc2626;">
+              <div class="stat-header">
+                <span class="stat-label">Active Stock Alerts</span>
+                <div class="stat-icon" style="background: var(--status-red-bg); color: var(--status-red);"><span class="icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></div>
+              </div>
+              <div class="stat-value" id="card-total-alerts">7 <small>Active</small></div>
+              <div class="stat-footer">
+                <span id="card-alerts-subtext">4 Critical, 3 Low</span>
+                <span class="stat-status-pill" style="background:var(--status-red-bg); color:var(--status-red-text); cursor:pointer;" onclick="switchView('alerts')">Review Alerts &rarr;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions Bar -->
+          <div class="quick-actions-bar">
+            <button class="quick-act-btn" onclick="openAddResourceModal()">
+              <div class="quick-act-icon"><span class="icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></div>
+              <div>
+                <div>Register Resource</div>
+                <small style="color:var(--text-muted); font-weight:normal;">Add new item</small>
+              </div>
+            </button>
+
+            <button class="quick-act-btn" onclick="switchView('beds')">
+              <div class="quick-act-icon"><span class="icon"><svg viewBox="0 0 24 24"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg></span></div>
+              <div>
+                <div>Manage ICU Beds</div>
+                <small style="color:var(--text-muted); font-weight:normal;">30-Bed Grid Matrix</small>
+              </div>
+            </button>
+
+            <button class="quick-act-btn" onclick="switchView('blood')">
+              <div class="quick-act-icon" style="color:var(--status-red);"><span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span></div>
+              <div>
+                <div>Blood Bank Intake</div>
+                <small style="color:var(--text-muted); font-weight:normal;">Manage 8 Blood Types</small>
+              </div>
+            </button>
+
+            <button class="quick-act-btn" onclick="switchView('alerts')">
+              <div class="quick-act-icon" style="color:var(--status-yellow);"><span class="icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span></div>
+              <div>
+                <div>Triage Shortages</div>
+                <small style="color:var(--text-muted); font-weight:normal;">Resolve Critical Alerts</small>
+              </div>
+            </button>
+          </div>
+
+          <!-- Two Column Layout: Readiness Index & Urgent Attention List -->
+          <div class="dashboard-two-col">
+            <!-- Left: Resource Readiness & Category Breakdown -->
+            <div class="dash-widget">
+              <div class="widget-title">
+                <span>Hospital Resource Readiness</span>
+                <span class="widget-action-link" onclick="switchView('analytics')">Full Analytics &rarr;</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom: 20px;">
+                <!-- Readiness Dial SVG -->
+                <div style="position:relative; width:130px; height:130px; flex-shrink:0;">
+                  <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
+                    <path stroke="var(--border-color)" stroke-width="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path id="readiness-dial-path" stroke="var(--primary)" stroke-width="3.5" stroke-dasharray="74, 100" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  </svg>
+                  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); text-align:center;">
+                    <div id="readiness-dial-val" style="font-size:1.5rem; font-weight:800; color:var(--text-main); line-height:1;">74%</div>
+                    <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Readiness</div>
+                  </div>
+                </div>
+
+                <div style="flex:1; min-width:220px;">
+                  <h4 style="font-size:0.92rem; margin-bottom:6px;">Critical Infrastructure Status</h4>
+                  <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                    Readiness score represents the proportion of safe resources currently above their minimum safety thresholds.
+                  </p>
+                  <div id="dashboard-category-bars" class="bar-chart-wrap">
+                    <!-- Injected dynamically by JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Urgent Shortages Attention -->
+            <div class="dash-widget">
+              <div class="widget-title">
+                <span>Immediate Attention Required</span>
+                <span class="widget-action-link" onclick="switchView('alerts')">View All</span>
+              </div>
+              <div id="urgent-items-list" class="urgent-list">
+                <!-- Dynamically loaded by JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 2: RESOURCE INVENTORY (MASTER TABLE)
+             ================================================================== -->
+        <section id="view-inventory" class="view-section">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>Master Resource Inventory</h2>
+              <p>Filter, search, adjust stock, and edit all hospital critical equipment and supplies.</p>
+            </div>
+            <div class="table-actions-right">
+              <button class="btn-primary" onclick="openAddResourceModal()" style="display:inline-flex; align-items:center; gap:6px;">
+                <span class="icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                Add New Resource
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <!-- Filter Toolbar -->
+            <div class="table-controls">
+              <div class="search-filter-group">
+                <div class="search-input-wrapper">
+                  <span class="search-icon-inside icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                  <input type="text" id="inventory-search" placeholder="Search resources by name, tag, or notes..." oninput="filterAndRenderInventory()">
+                </div>
+
+                <select id="filter-category" class="select-filter" onchange="filterAndRenderInventory()">
+                  <option value="ALL">All Categories</option>
+                  <option value="icu_beds">ICU Beds</option>
+                  <option value="oxygen">Oxygen Equipment</option>
+                  <option value="ventilators">Ventilators</option>
+                  <option value="medicines">Medicines</option>
+                  <option value="blood">Blood Bank</option>
+                  <option value="other">Other Critical Supplies</option>
+                </select>
+
+                <select id="filter-status" class="select-filter" onchange="filterAndRenderInventory()">
+                  <option value="ALL">All Statuses</option>
+                  <option value="GREEN">Green (Sufficient)</option>
+                  <option value="YELLOW">Yellow (Low Stock)</option>
+                  <option value="RED">Red (Critical Shortage)</option>
+                  <option value="GRAY">Gray (Maintenance / Expired)</option>
+                </select>
+
+                <select id="sort-by" class="select-filter" onchange="filterAndRenderInventory()">
+                  <option value="name_asc">Sort: Name (A-Z)</option>
+                  <option value="name_desc">Sort: Name (Z-A)</option>
+                  <option value="avail_asc">Sort: Available (Low &rarr; High)</option>
+                  <option value="avail_desc">Sort: Available (High &rarr; Low)</option>
+                  <option value="status_urgency">Sort: By Severity / Urgency</option>
+                </select>
+
+                <button class="btn-clear-filters" onclick="resetFilters()">
+                  <span class="icon" style="width:14px; height:14px;"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></span>
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+
+            <!-- Inventory Table -->
+            <div class="table-responsive">
+              <table class="custom-table" id="inventory-table">
+                <thead>
+                  <tr>
+                    <th>Resource Name</th>
+                    <th>Category</th>
+                    <th style="text-align:center;">Total Capacity</th>
+                    <th style="text-align:center;">Available Stock</th>
+                    <th style="text-align:center;">Occupied / In-Use</th>
+                    <th style="text-align:center;">Min Threshold</th>
+                    <th>Status</th>
+                    <th>Last Updated</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-table-body">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-footer">
+              <span id="table-showing-text">Showing 0 of 0 resources</span>
+              <span style="font-size:0.75rem; color:var(--text-light);">Use quick +/- buttons to adjust available counts instantly</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 3: ICU BEDS WARD MONITOR & 30-BED MATRIX
+             ================================================================== -->
+        <section id="view-beds" class="view-section">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>ICU Beds Management Console</h2>
+              <p>Visual 30-bed interactive grid matrix. Click any bed to assign patients, discharge, or mark for cleaning.</p>
+            </div>
+            <div>
+              <button class="btn-secondary" onclick="resetAllBedsToDemo()" style="display:inline-flex; align-items:center; gap:6px;">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></span>
+                Reset Bed Demo Data
+              </button>
+            </div>
+          </div>
+
+          <!-- Bed Matrix Widget -->
+          <div class="bed-matrix-container">
+            <div class="bed-matrix-header">
+              <div>
+                <h3 style="font-size:1.1rem; font-weight:700;">Critical Care Unit — Ward A & B Layout</h3>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+                  Direct live representation of all 30 ICU Beds (Bed 101 to 130).
+                </p>
+              </div>
+
+              <!-- Legend -->
+              <div class="bed-legend">
+                <div class="legend-item">
+                  <div class="legend-box" style="background:var(--status-green); border:1px solid var(--status-green-border);"></div>
+                  <span>Available (<span id="matrix-avail-count">0</span>)</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-box" style="background:#2563eb;"></div>
+                  <span>Occupied (<span id="matrix-occupied-count">0</span>)</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-box" style="background:var(--status-gray);"></div>
+                  <span>Cleaning / Sanitization (<span id="matrix-cleaning-count">0</span>)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 30 Interactive Bed Cards Grid -->
+            <div class="bed-grid-30" id="bed-matrix-grid">
+              <!-- Dynamically populated 30 beds -->
+            </div>
+          </div>
+
+          <!-- Bed Category Summary Cards -->
+          <div class="dashboard-three-col" id="beds-detail-cards">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 4: OXYGEN EQUIPMENT
+             ================================================================== -->
+        <section id="view-oxygen" class="view-section">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>Oxygen Equipment Monitor</h2>
+              <p>Track cylinders, mobile concentrators, and central manifold units. Equipment count indicates physical devices, not gas volume.</p>
+            </div>
+            <div>
+              <button class="btn-primary" onclick="openAddResourceModal('oxygen')">Add Oxygen Device</button>
+            </div>
+          </div>
+
+          <div class="stats-grid" id="oxygen-summary-grid">
+            <!-- Populated via JS -->
+          </div>
+
+          <div class="table-container" style="margin-top:20px;">
+            <div style="padding:16px 20px; border-bottom:1px solid var(--border-color); font-weight:700; font-size:1rem;">
+              Oxygen Equipment Inventory Status
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Equipment Type</th>
+                    <th>Total Inventory</th>
+                    <th>Available Devices</th>
+                    <th>Currently In Use</th>
+                    <th>Safety Threshold</th>
+                    <th>Status</th>
+                    <th>Quick Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="oxygen-table-body">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 5: VENTILATORS
+             ================================================================== -->
+        <section id="view-ventilators" class="view-section">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>Ventilator Fleet Management</h2>
+              <p>Track total ventilators, active patient deployments, and units under biomedical maintenance. (Maintenance units never count as available).</p>
+            </div>
+            <div>
+              <button class="btn-primary" onclick="openAddResourceModal('ventilators')">Register Ventilator</button>
+            </div>
+          </div>
+
+          <div class="stats-grid" id="vent-summary-grid">
+            <!-- Populated via JS -->
+          </div>
+
+          <div class="dash-widget" style="margin-top:20px;">
+            <div class="widget-title">
+              <span>Ventilator Fleet Breakdown & Maintenance Registry</span>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Model / Fleet</th>
+                    <th>Total Units</th>
+                    <th>Ready for Patients</th>
+                    <th>Deployed in Ward</th>
+                    <th>In Maintenance</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="vent-table-body">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 6: MEDICINES
+             ================================================================== -->
+        <section id="view-medicines" class="view-section">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>Pharmacy & Critical Medications</h2>
+              <p>Monitor critical injectable drugs, emergency vasopressors, and antibiotics. Near-expiry and expired lots are automatically isolated.</p>
+            </div>
+            <div>
+              <button class="btn-primary" onclick="openAddResourceModal('medicines')">Add Medicine</button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <div style="padding:16px 20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:700; font-size:1rem;">Medication Formulary & Expiry Tracker</span>
+              <span style="font-size:0.75rem; color:var(--text-muted);">*Inventory tracking only. Does not provide clinical dosage advice.</span>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Drug Name & Formulation</th>
+                    <th>Clinical Class</th>
+                    <th style="text-align:center;">Available Stock</th>
+                    <th style="text-align:center;">Safety Threshold</th>
+                    <th>Expiry Date</th>
+                    <th>Stock & Expiry Status</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="medicines-table-body">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 7: BLOOD BANK
+             ================================================================== -->
+        <section id="view-blood" class="view-section">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>Blood Bank & Transfusion Inventory</h2>
+              <p>Real-time units across all 8 standard blood groups (A+, A-, B+, B-, AB+, AB-, O+, O-). Universal donor shortages are highlighted in red.</p>
+            </div>
+          </div>
+
+          <!-- 8 Blood Group Cards -->
+          <div class="blood-grid" id="blood-bank-grid">
+            <!-- Dynamically populated by JS -->
+          </div>
+
+          <div class="dash-widget" style="margin-top:20px;">
+            <div class="widget-title">
+              <span>Blood Group Safe Threshold Comparison</span>
+            </div>
+            <div id="blood-chart-vertical-area" class="vertical-chart-wrap">
+              <!-- Populated by JS -->
+            </div>
+            <div style="margin-top:12px; font-size:0.75rem; color:var(--text-muted); text-align:center;">
+              Red dashed lines represent minimum safety thresholds. Items below the line indicate urgent donor drive required.
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 8: ALERTS & SHORTAGES
+             ================================================================== -->
+        <section id="view-alerts" class="view-section">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>Smart Alert & Shortage Console</h2>
+              <p>Rule-based monitoring of stock shortages, equipment maintenance, and batch expiries with suggested administrative actions.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <select id="alerts-filter-select" class="select-filter" onchange="renderAlertsView()">
+                <option value="ALL">Show All Alerts</option>
+                <option value="CRITICAL">Critical Shortages Only</option>
+                <option value="LOW">Low Stock Warnings Only</option>
+                <option value="MAINT">Maintenance / Expired Only</option>
+                <option value="UNACK">Unacknowledged Only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="alerts-feed" id="alerts-container">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 9: VISUAL ANALYTICS
+             ================================================================== -->
+        <section id="view-analytics" class="view-section">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>Visual Resource Analytics</h2>
+              <p>Dynamic charts generated via SVG and vanilla JavaScript. Updates automatically upon any inventory change without external libraries.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-two-col">
+            <!-- ICU Donut Chart -->
+            <div class="chart-container">
+              <div class="chart-header">
+                <h3>ICU Bed Capacity & Occupancy Ratio</h3>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Real-time</span>
+              </div>
+              <div class="chart-body">
+                <div class="donut-wrap">
+                  <div class="donut-svg-box">
+                    <svg viewBox="0 0 42 42" style="width:100%; height:100%; transform: rotate(-90deg);">
+                      <!-- Background circle -->
+                      <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="var(--border-color)" stroke-width="4.5"></circle>
+                      <!-- Occupied Segment -->
+                      <circle id="donut-occupied-seg" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#2563eb" stroke-width="4.5" stroke-dasharray="60 40" stroke-dashoffset="0"></circle>
+                      <!-- Available Segment -->
+                      <circle id="donut-avail-seg" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#10b981" stroke-width="4.5" stroke-dasharray="40 60" stroke-dashoffset="-60"></circle>
+                    </svg>
+                    <div class="donut-center-text">
+                      <div class="num" id="donut-center-num">60%</div>
+                      <div class="desc">Occupancy</div>
+                    </div>
+                  </div>
+                  <div style="display:flex; gap:16px; font-size:0.78rem;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <div style="width:12px; height:12px; background:#2563eb; border-radius:2px;"></div>
+                      <span id="donut-legend-occ">Occupied: 18 Beds</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <div style="width:12px; height:12px; background:#10b981; border-radius:2px;"></div>
+                      <span id="donut-legend-avail">Available: 12 Beds</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category Stock Availability Bars -->
+            <div class="chart-container">
+              <div class="chart-header">
+                <h3>Stock Availability by Category</h3>
+                <span style="font-size:0.75rem; color:var(--text-muted);">% Available vs Total</span>
+              </div>
+              <div class="chart-body">
+                <div id="analytics-category-bars" class="bar-chart-wrap">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Full Width Blood Group Comparison -->
+          <div class="chart-container" style="margin-top:20px;">
+            <div class="chart-header">
+              <h3>Blood Bank Stock vs Minimum Threshold Levels</h3>
+              <span style="font-size:0.75rem; color:var(--text-muted);">Units per Blood Type</span>
+            </div>
+            <div class="chart-body" style="padding:10px 0;">
+              <div id="analytics-blood-bars" class="vertical-chart-wrap" style="height:220px;">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             VIEW 10: SETTINGS & SYSTEM CONFIGURATION
+             ================================================================== -->
+        <section id="view-settings" class="view-section">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h2>Settings & Demo Configuration</h2>
+              <p>Configure hospital display metadata, customize low-stock safety thresholds, and manage data backups.</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <!-- Hospital Profile -->
+            <div class="settings-card">
+              <h3>Hospital Facility Identity</h3>
+              <p>Customize the organization name displayed across the dashboard and reports.</p>
+              
+              <div class="form-group">
+                <label class="form-label" for="setting-hospital-name">Hospital Facility Name</label>
+                <input type="text" id="setting-hospital-name" class="form-control" value="Apex Metro General Hospital">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="setting-admin-name">Administrator In-Charge</label>
+                <input type="text" id="setting-admin-name" class="form-control" value="Dr. Alistair Vance, CMO">
+              </div>
+
+              <button class="btn-primary" onclick="saveHospitalSettings()">Save Facility Information</button>
+            </div>
+
+            <!-- Appearance & Theme -->
+            <div class="settings-card">
+              <h3>Display & Preferences</h3>
+              <p>Adjust visual appearance and color contrast modes.</p>
+
+              <div class="toggle-group">
+                <div>
+                  <div style="font-weight:600; font-size:0.86rem;">Dark Interface Mode</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Reduces eye fatigue during night monitoring</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="setting-dark-toggle" onchange="toggleTheme()">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-group">
+                <div>
+                  <div style="font-weight:600; font-size:0.86rem;">Auto-Save Changes to Browser</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Persists all modifications into HTML5 localStorage</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked disabled>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Data Backup & Reset -->
+            <div class="settings-card">
+              <h3>Data Management & Reset</h3>
+              <p>Export current inventory as a JSON file, or restore factory fictional demo data.</p>
+
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn-secondary" onclick="exportDataJSON()" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                  <span class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                  Download Inventory Backup (JSON)
+                </button>
+
+                <label class="btn-secondary" style="display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
+                  <span class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+                  Import Backup File (JSON)
+                  <input type="file" id="import-json-file" accept=".json" onchange="importDataJSON(event)" style="display:none;">
+                </label>
+
+                <button class="btn-danger" onclick="openResetModal()" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:8px;">
+                  <span class="icon"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></span>
+                  Reset to Factory Demo Data
+                </button>
+              </div>
+            </div>
+
+            <!-- Compliance and Safety Documentation -->
+            <div class="settings-card">
+              <h3>Safety & Regulatory Notice</h3>
+              <p>Legal and medical disclaimer for college hackathon presentation.</p>
+              <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.6; background:var(--bg-card-subtle); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+                <strong>Notice:</strong> This web application is a software demonstration built for educational and hackathon evaluation purposes. It does not interface with medical devices or certified electronic health record (EHR) platforms. Data is stored solely inside the local browser and is not shared across external networks.
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       NOTIFICATION DRAWER (SLIDE-OUT)
+       ==================================================================== -->
+  <aside id="notif-drawer">
+    <div class="drawer-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="icon" style="color:var(--status-red);"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+        <h3 style="font-size:1.05rem; font-weight:700;">Active Shortages & Alerts</h3>
+      </div>
+      <button class="btn-close-modal" onclick="toggleNotifDrawer()">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawer-alerts-list">
+      <!-- Injected via JS -->
+    </div>
+    <div style="padding:14px 18px; border-top:1px solid var(--border-color); background:var(--bg-card-subtle);">
+      <button class="btn-primary" style="width:100%;" onclick="toggleNotifDrawer(); switchView('alerts');">Open Alerts Management</button>
+    </div>
+  </aside>
+
+  <!-- ====================================================================
+       MODAL 1: ADD / EDIT RESOURCE
+       ==================================================================== -->
+  <div class="modal-backdrop" id="modal-resource">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-resource-title">Register New Resource</h3>
+        <button class="btn-close-modal" onclick="closeResourceModal()">&times;</button>
+      </div>
+      <form id="resource-form" onsubmit="handleResourceFormSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="form-res-id">
+
+          <div class="form-group">
+            <label class="form-label" for="form-res-name">Resource Name *</label>
+            <input type="text" id="form-res-name" class="form-control" required placeholder="e.g. Type D Medical O2 Cylinder">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="form-res-cat">Category *</label>
+              <select id="form-res-cat" class="form-control" required onchange="handleCategoryFieldToggles()">
+                <option value="icu_beds">ICU Beds</option>
+                <option value="oxygen">Oxygen Equipment</option>
+                <option value="ventilators">Ventilators</option>
+                <option value="medicines">Medicines</option>
+                <option value="blood">Blood Bank</option>
+                <option value="other">Other Critical Supplies</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="form-res-unit">Unit of Measure</label>
+              <input type="text" id="form-res-unit" class="form-control" placeholder="Beds, Units, Cylinders, Boxes" value="Units">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="form-res-total">Total Capacity / Inventory *</label>
+              <input type="number" id="form-res-total" class="form-control" min="1" required value="10">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="form-res-avail">Available Quantity *</label>
+              <input type="number" id="form-res-avail" class="form-control" min="0" required value="5">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="form-res-occupied">In-Use / Occupied Quantity</label>
+              <input type="number" id="form-res-occupied" class="form-control" min="0" value="5">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="form-res-threshold">Minimum Stock Threshold *</label>
+              <input type="number" id="form-res-threshold" class="form-control" min="1" required value="3">
+            </div>
+          </div>
+
+          <!-- Maintenance Field for Ventilators / Equipment -->
+          <div class="form-group" id="group-maint" style="display:none;">
+            <label class="form-label" for="form-res-maint">Equipment Under Maintenance (Excluded from Available)</label>
+            <input type="number" id="form-res-maint" class="form-control" min="0" value="0">
+          </div>
+
+          <!-- Expiry Date Field for Medicines / Blood -->
+          <div class="form-group" id="group-expiry" style="display:none;">
+            <label class="form-label" for="form-res-expiry">Expiry Date</label>
+            <input type="date" id="form-res-expiry" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="form-res-notes">Location / Operational Notes</label>
+            <input type="text" id="form-res-notes" class="form-control" placeholder="e.g. Block C, Ward 4 Storage">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeResourceModal()">Cancel</button>
+          <button type="submit" class="btn-primary" id="btn-save-res">Save Resource</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 2: INTERACTIVE BED ASSIGNMENT MODAL
+       ==================================================================== -->
+  <div class="modal-backdrop" id="modal-bed">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-header">
+        <h3 id="modal-bed-title">Bed #101 Status</h3>
+        <button class="btn-close-modal" onclick="closeBedModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="modal-bed-id">
+
+        <div class="form-group">
+          <label class="form-label">Bed Status</label>
+          <select id="modal-bed-status-select" class="form-control">
+            <option value="available">Available (Ready for Admission)</option>
+            <option value="occupied">Occupied (Patient Admitted)</option>
+            <option value="maintenance">Sanitizing / Maintenance</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Patient Demo Code / Triage Tag</label>
+          <input type="text" id="modal-bed-code" class="form-control" placeholder="e.g. PT-4091 (Fictional ID only)">
+          <small style="color:var(--text-muted); font-size:0.72rem; margin-top:4px; display:block;">
+            *Do not enter real patient names or personal health information.
+          </small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeBedModal()">Cancel</button>
+        <button type="button" class="btn-primary" onclick="saveBedStatusFromModal()">Update Bed Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 3: DELETE CONFIRMATION MODAL
+       ==================================================================== -->
+  <div class="modal-backdrop" id="modal-delete">
+    <div class="modal-box" style="max-width:420px;">
+      <div class="modal-header">
+        <h3 style="color:var(--status-red);">Confirm Deletion</h3>
+        <button class="btn-close-modal" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.9rem; color:var(--text-main); margin-bottom:10px;">
+          Are you sure you want to delete <strong id="delete-res-name">this resource</strong>?
+        </p>
+        <p style="font-size:0.8rem; color:var(--text-muted);">
+          This will permanently remove the item from local browser storage. Related alerts will also be updated.
+        </p>
+        <input type="hidden" id="delete-res-id">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button type="button" class="btn-danger" onclick="executeDeleteResource()">Yes, Delete Resource</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 4: RESET DEMO DATA CONFIRMATION MODAL
+       ==================================================================== -->
+  <div class="modal-backdrop" id="modal-reset">
+    <div class="modal-box" style="max-width:420px;">
+      <div class="modal-header">
+        <h3 style="color:var(--status-red);">Reset Demo Data?</h3>
+        <button class="btn-close-modal" onclick="closeResetModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.9rem; color:var(--text-main); margin-bottom:10px;">
+          This will reset all hospital resources, beds, alerts, and settings back to their original fictional demo state.
+        </p>
+        <p style="font-size:0.8rem; color:var(--text-muted);">
+          Any custom additions or edits will be replaced.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeResetModal()">Cancel</button>
+        <button type="button" class="btn-danger" onclick="executeResetDemoData()">Reset Everything</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       FLOATING TOAST CONTAINER
+       ==================================================================== -->
+  <div id="toast-container"></div>
+
+  <!-- ====================================================================
+       JAVASCRIPT APPLICATION LOGIC
+       ==================================================================== -->
+  <script>
+    /* ====================================================================
+       A. DEFAULT FICTIONAL DEMO DATASET
+       ==================================================================== */
+    const DEFAULT_RESOURCES = [
+      // 1. ICU Beds
+      {
+        id: "res-icu-1",
+        name: "Adult Intensive Care Unit (ICU) Beds",
+        category: "icu_beds",
+        total: 30,
+        available: 12,
+        occupied: 18,
+        maintenance: 0,
+        threshold: 8,
+        unit: "Beds",
+        expiryDate: null,
+        notes: "Main Hospital Wing - ICU Floor 3",
+        lastUpdated: "2026-10-15T08:30:00"
+      },
+      {
+        id: "res-icu-2",
+        name: "Neonatal ICU (NICU) Incubator Beds",
+        category: "icu_beds",
+        total: 12,
+        available: 3,
+        occupied: 9,
+        maintenance: 0,
+        threshold: 4,
+        unit: "Incubators",
+        expiryDate: null,
+        notes: "Maternity & Pediatric Care Wing",
+        lastUpdated: "2026-10-15T08:45:00"
+      },
+      {
+        id: "res-icu-3",
+        name: "Cardiac ICU (CCU) Monitored Beds",
+        category: "icu_beds",
+        total: 10,
+        available: 2,
+        occupied: 8,
+        maintenance: 0,
+        threshold: 3,
+        unit: "Beds",
+        expiryDate: null,
+        notes: "Heart & Vascular Tower",
+        lastUpdated: "2026-10-15T09:10:00"
+      },
+
+      // 2. Oxygen Equipment
+      {
+        id: "res-o2-1",
+        name: "Type D Portable Oxygen Cylinders (425L)",
+        category: "oxygen",
+        total: 50,
+        available: 14,
+        occupied: 36,
+        maintenance: 0,
+        threshold: 15,
+        unit: "Cylinders",
+        expiryDate: null,
+        notes: "Emergency & Patient Transport Supply",
+        lastUpdated: "2026-10-15T07:20:00"
+      },
+      {
+        id: "res-o2-2",
+        name: "Jumbo Type B High-Capacity O2 Cylinders",
+        category: "oxygen",
+        total: 25,
+        available: 2,
+        occupied: 23,
+        maintenance: 0,
+        threshold: 5,
+        unit: "Cylinders",
+        expiryDate: null,
+        notes: "Ward Backup Reserve Manifold",
+        lastUpdated: "2026-10-15T08:15:00"
+      },
+      {
+        id: "res-o2-3",
+        name: "10L Heavy-Duty Oxygen Concentrators",
+        category: "oxygen",
+        total: 18,
+        available: 9,
+        occupied: 9,
+        maintenance: 0,
+        threshold: 4,
+        unit: "Devices",
+        expiryDate: null,
+        notes: "General Medical Wards",
+        lastUpdated: "2026-10-15T08:00:00"
+      },
+      {
+        id: "res-o2-4",
+        name: "5L Mobile Compact Concentrators",
+        category: "oxygen",
+        total: 12,
+        available: 0,
+        occupied: 12,
+        maintenance: 0,
+        threshold: 3,
+        unit: "Devices",
+        expiryDate: null,
+        notes: "Outpatient & Triage Center",
+        lastUpdated: "2026-10-15T09:00:00"
+      },
+      {
+        id: "res-o2-5",
+        name: "High-Flow Nasal Cannula (HFNC) Units",
+        category: "oxygen",
+        total: 15,
+        available: 8,
+        occupied: 7,
+        maintenance: 0,
+        threshold: 3,
+        unit: "Units",
+        expiryDate: null,
+        notes: "Pulmonary Critical Care",
+        lastUpdated: "2026-10-15T09:15:00"
+      },
+
+      // 3. Ventilators
+      {
+        id: "res-vent-1",
+        name: "High-Acuity ICU Invasive Ventilators",
+        category: "ventilators",
+        total: 15,
+        available: 3,
+        occupied: 10,
+        maintenance: 2,
+        threshold: 4,
+        unit: "Machines",
+        expiryDate: null,
+        notes: "ICU Core Fleet (2 under scheduled calibration)",
+        lastUpdated: "2026-10-15T08:50:00"
+      },
+      {
+        id: "res-vent-2",
+        name: "Portable Emergency Transport Ventilators",
+        category: "ventilators",
+        total: 8,
+        available: 1,
+        occupied: 6,
+        maintenance: 1,
+        threshold: 2,
+        unit: "Machines",
+        expiryDate: null,
+        notes: "Ambulance & Trauma Bay Fleet",
+        lastUpdated: "2026-10-15T07:40:00"
+      },
+      {
+        id: "res-vent-3",
+        name: "Non-Invasive BiPAP / CPAP Ventilators",
+        category: "ventilators",
+        total: 12,
+        available: 7,
+        occupied: 4,
+        maintenance: 1,
+        threshold: 3,
+        unit: "Machines",
+        expiryDate: null,
+        notes: "Step-Down Respiratory Unit",
+        lastUpdated: "2026-10-15T09:20:00"
+      },
+
+      // 4. Medicines
+      {
+        id: "res-med-1",
+        name: "Meropenem 1g IV Injectable",
+        category: "medicines",
+        total: 100,
+        available: 45,
+        occupied: 55,
+        maintenance: 0,
+        threshold: 50,
+        unit: "Vials",
+        expiryDate: "2026-12-10",
+        notes: "Broad-spectrum critical antibiotic",
+        lastUpdated: "2026-10-15T06:30:00"
+      },
+      {
+        id: "res-med-2",
+        name: "Noradrenaline 4mg/2ml (Norepinephrine)",
+        category: "medicines",
+        total: 50,
+        available: 8,
+        occupied: 42,
+        maintenance: 0,
+        threshold: 20,
+        unit: "Ampoules",
+        expiryDate: "2027-04-15",
+        notes: "First-line vasopressor for septic shock",
+        lastUpdated: "2026-10-15T08:20:00"
+      },
+      {
+        id: "res-med-3",
+        name: "Propofol 1% 20ml Emulsion",
+        category: "medicines",
+        total: 150,
+        available: 120,
+        occupied: 30,
+        maintenance: 0,
+        threshold: 40,
+        unit: "Vials",
+        expiryDate: "2027-01-30",
+        notes: "ICU Sedation & Anesthesia",
+        lastUpdated: "2026-10-15T08:00:00"
+      },
+      {
+        id: "res-med-4",
+        name: "Enoxaparin 40mg/0.4ml Prefilled Syringes",
+        category: "medicines",
+        total: 80,
+        available: 15,
+        occupied: 65,
+        maintenance: 0,
+        threshold: 25,
+        unit: "Syringes",
+        expiryDate: "2026-10-28", // Near expiry (within 30 days)
+        notes: "Anticoagulant - Lot #ENX-901 expires soon",
+        lastUpdated: "2026-10-15T07:15:00"
+      },
+      {
+        id: "res-med-5",
+        name: "Remdesivir 100mg Lyophilized Powder",
+        category: "medicines",
+        total: 40,
+        available: 22,
+        occupied: 18,
+        maintenance: 0,
+        threshold: 15,
+        unit: "Vials",
+        expiryDate: "2027-08-20",
+        notes: "Antiviral formulation",
+        lastUpdated: "2026-10-15T08:40:00"
+      },
+      {
+        id: "res-med-6",
+        name: "Hydrocortisone Sodium Succinate 100mg",
+        category: "medicines",
+        total: 60,
+        available: 0,
+        occupied: 60,
+        maintenance: 0,
+        threshold: 15,
+        unit: "Vials",
+        expiryDate: "2026-11-20",
+        notes: "Emergency corticosteroid (STOCK ZERO)",
+        lastUpdated: "2026-10-15T09:25:00"
+      },
+      {
+        id: "res-med-7",
+        name: "Ceftriaxone 1g Injectable (Demo Expired Batch)",
+        category: "medicines",
+        total: 30,
+        available: 10,
+        occupied: 20,
+        maintenance: 0,
+        threshold: 15,
+        unit: "Vials",
+        expiryDate: "2026-10-01", // Past expiry
+        notes: "QUARANTINED - Do not dispense (demo test case)",
+        lastUpdated: "2026-10-15T06:00:00"
+      },
+
+      // 5. Blood Bank (All 8 Groups)
+      { id: "res-bld-1", name: "Blood Group A+ (Packed Red Cells)", category: "blood", total: 40, available: 24, occupied: 16, maintenance: 0, threshold: 15, unit: "Units", expiryDate: "2026-11-12", notes: "Blood Bank Vault A", lastUpdated: "2026-10-15T08:00:00" },
+      { id: "res-bld-2", name: "Blood Group A- (Packed Red Cells)", category: "blood", total: 10, available: 3, occupied: 7, maintenance: 0, threshold: 6, unit: "Units", expiryDate: "2026-11-05", notes: "Low stock alert", lastUpdated: "2026-10-15T08:00:00" },
+      { id: "res-bld-3", name: "Blood Group B+ (Packed Red Cells)", category: "blood", total: 50, available: 30, occupied: 20, maintenance: 0, threshold: 15, unit: "Units", expiryDate: "2026-11-15", notes: "Sufficient inventory", lastUpdated: "2026-10-15T08:00:00" },
+      { id: "res-bld-4", name: "Blood Group B- (Packed Red Cells)", category: "blood", total: 12, available: 4, occupied: 8, maintenance: 0, threshold: 5, unit: "Units", expiryDate: "2026-11-08", notes: "Moderate stock", lastUpdated: "2026-10-15T08:00:00" },
+      { id: "res-bld-5", name: "Blood Group AB+ (Universal Recipient)", category: "blood", total: 20, available: 12, occupied: 8, maintenance: 0, threshold: 8, unit: "Units", expiryDate: "2026-11-18", notes: "Vault B Reserve", lastUpdated: "2026-10-15T08:00:00" },
+      { id: "res-bld-6", name: "Blood Group AB- (Rare Unit)", category: "blood", total: 8, available: 1, occupied: 7, maintenance: 0, threshold: 4, unit: "Units", expiryDate: "2026-11-02", notes: "CRITICAL SHORTAGE", lastUpdated: "2026-10-15T08:00:00" },
+      { id: "res-bld-7", name: "Blood Group O+ (Packed Red Cells)", category: "blood", total: 60, available: 35, occupied: 25, maintenance: 0, threshold: 20, unit: "Units", expiryDate: "2026-11-14", notes: "Healthy inventory", lastUpdated: "2026-10-15T08:00:00" },
+      { id: "res-bld-8", name: "Blood Group O- (Universal Donor)", category: "blood", total: 15, available: 2, occupied: 13, maintenance: 0, threshold: 8, unit: "Units", expiryDate: "2026-10-29", notes: "EMERGENCY SHORTAGE - Universal donor critical", lastUpdated: "2026-10-15T09:20:00" },
+
+      // 6. Other Critical Supplies
+      {
+        id: "res-oth-1",
+        name: "Level 3 Isolation PPE Hazmat Coveralls",
+        category: "other",
+        total: 100,
+        available: 18,
+        occupied: 82,
+        maintenance: 0,
+        threshold: 25,
+        unit: "Kits",
+        expiryDate: null,
+        notes: "Infection Control Warehouse",
+        lastUpdated: "2026-10-15T07:50:00"
+      },
+      {
+        id: "res-oth-2",
+        name: "N95 Surgical Respirator Masks (Boxes of 50)",
+        category: "other",
+        total: 200,
+        available: 140,
+        occupied: 60,
+        maintenance: 0,
+        threshold: 50,
+        unit: "Boxes",
+        expiryDate: null,
+        notes: "Central Medical Store",
+        lastUpdated: "2026-10-15T08:30:00"
+      },
+      {
+        id: "res-oth-3",
+        name: "Biphasic Emergency Defibrillators",
+        category: "other",
+        total: 10,
+        available: 8,
+        occupied: 2,
+        maintenance: 0,
+        threshold: 3,
+        unit: "Units",
+        expiryDate: null,
+        notes: "Trauma Resuscitation Bays",
+        lastUpdated: "2026-10-15T08:00:00"
+      }
+    ];
+
+    // Initial 30 ICU Beds configuration (Matches 18 Occupied + 12 Available = 30)
+    function generateInitialBeds() {
+      const beds = [];
+      for (let i = 1; i <= 30; i++) {
+        const bedNum = 100 + i;
+        const isOccupied = i <= 18; // First 18 occupied
+        beds.push({
+          id: bedNum,
+          name: `ICU Bed #${bedNum}`,
+          ward: i <= 15 ? "ICU Ward A" : "ICU Ward B",
+          status: isOccupied ? "occupied" : "available",
+          patientCode: isOccupied ? `PT-${7800 + i}` : ""
+        });
+      }
+      return beds;
+    }
+
+    /* ====================================================================
+       B. LOCALSTORAGE & STATE MANAGEMENT
+       ==================================================================== */
+    const STORAGE_KEY_RESOURCES = "meditrack_resources_v2";
+    const STORAGE_KEY_BEDS = "meditrack_beds_v2";
+    const STORAGE_KEY_SETTINGS = "meditrack_settings_v2";
+    const STORAGE_KEY_ACKED = "meditrack_acked_alerts_v2";
+
+    let resources = [];
+    let beds = [];
+    let acknowledgedAlerts = new Set();
+    let appSettings = {
+      hospitalName: "Apex Metro General Hospital",
+      adminName: "Dr. Alistair Vance, CMO",
+      theme: "light"
+    };
+
+    function loadState() {
+      try {
+        const savedRes = localStorage.getItem(STORAGE_KEY_RESOURCES);
+        resources = savedRes ? JSON.parse(savedRes) : JSON.parse(JSON.stringify(DEFAULT_RESOURCES));
+
+        const savedBeds = localStorage.getItem(STORAGE_KEY_BEDS);
+        beds = savedBeds ? JSON.parse(savedBeds) : generateInitialBeds();
+
+        const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
+        if (savedSettings) {
+          appSettings = Object.assign(appSettings, JSON.parse(savedSettings));
+        }
+
+        const savedAcked = localStorage.getItem(STORAGE_KEY_ACKED);
+        acknowledgedAlerts = savedAcked ? new Set(JSON.parse(savedAcked)) : new Set();
+      } catch (e) {
+        console.error("Error loading localStorage data:", e);
+        resources = JSON.parse(JSON.stringify(DEFAULT_RESOURCES));
+        beds = generateInitialBeds();
+      }
+
+      applySettings();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY_RESOURCES, JSON.stringify(resources));
+        localStorage.setItem(STORAGE_KEY_BEDS, JSON.stringify(beds));
+        localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(appSettings));
+        localStorage.setItem(STORAGE_KEY_ACKED, JSON.stringify(Array.from(acknowledgedAlerts)));
+      } catch (e) {
+        console.error("Error saving state to localStorage:", e);
+      }
+    }
+
+    function applySettings() {
+      document.getElementById("header-hospital-name").textContent = appSettings.hospitalName;
+      document.getElementById("setting-hospital-name").value = appSettings.hospitalName;
+      document.getElementById("setting-admin-name").value = appSettings.adminName;
+      document.documentElement.setAttribute("data-theme", appSettings.theme || "light");
+      document.getElementById("setting-dark-toggle").checked = (appSettings.theme === "dark");
+    }
+
+    /* ====================================================================
+       C. SMART STATUS & ALERT ENGINE
+       ==================================================================== */
+    function checkExpiryStatus(expiryDateStr) {
+      if (!expiryDateStr) return { isExpired: false, isNearExpiry: false };
+      const exp = new Date(expiryDateStr);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays < 0) return { isExpired: true, isNearExpiry: false, days: diffDays };
+      if (diffDays <= 30) return { isExpired: false, isNearExpiry: true, days: diffDays };
+      return { isExpired: false, isNearExpiry: false, days: diffDays };
+    }
+
+    function computeResourceStatus(res) {
+      const expiry = checkExpiryStatus(res.expiryDate);
+      
+      // Expired items cannot be used
+      if (expiry.isExpired) {
+        return {
+          code: "GRAY",
+          label: "Expired Batch",
+          sublabel: "Quarantined",
+          isCritical: true,
+          severity: 3
+        };
+      }
+
+      // Equipment entirely under maintenance
+      if (res.available === 0 && res.maintenance > 0 && res.occupied === 0) {
+        return {
+          code: "GRAY",
+          label: "In Maintenance",
+          sublabel: "Unavailable",
+          isCritical: false,
+          severity: 2
+        };
+      }
+
+      // Critical Shortage: 0 available or available <= 20% of threshold
+      if (res.available === 0 || res.available <= Math.ceil(res.threshold * 0.25)) {
+        return {
+          code: "RED",
+          label: "Critical Shortage",
+          sublabel: `${res.available} left (Min: ${res.threshold})`,
+          isCritical: true,
+          severity: 4
+        };
+      }
+
+      // Low Stock: available < threshold
+      if (res.available < res.threshold) {
+        return {
+          code: "YELLOW",
+          label: "Low Stock",
+          sublabel: `${res.available} left (Min: ${res.threshold})`,
+          isCritical: false,
+          severity: 2
+        };
+      }
+
+      // Sufficient
+      return {
+        code: "GREEN",
+        label: "Sufficient",
+        sublabel: "Healthy",
+        isCritical: false,
+        severity: 1
+      };
+    }
+
+    function generateAlertList() {
+      const alerts = [];
+
+      resources.forEach(res => {
+        const status = computeResourceStatus(res);
+        const expiry = checkExpiryStatus(res.expiryDate);
+
+        // 1. Critical Shortage Alert
+        if (status.code === "RED") {
+          let rec = "Order immediate emergency replenishment from vendor.";
+          if (res.category === "blood") rec = "Initiate emergency blood donor alert & contact regional blood bank.";
+          if (res.category === "icu_beds") rec = "Review transfer options for stable patients to step-down wards.";
+          if (res.category === "oxygen") rec = "Re-route manifold supplies and dispatch urgent cylinder refilling.";
+          if (res.category === "ventilators") rec = "Check post-op recovery units for non-deployed portable ventilators.";
+
+          alerts.push({
+            id: `alert-crit-${res.id}`,
+            resourceId: res.id,
+            resourceName: res.name,
+            category: res.category,
+            severity: "CRITICAL",
+            typeCode: "RED",
+            title: `Critical Shortage: ${res.name}`,
+            message: `Available quantity (${res.available} ${res.unit}) is severely below the minimum threshold of ${res.threshold} ${res.unit}.`,
+            recommendation: rec,
+            currentVal: res.available,
+            threshold: res.threshold,
+            timestamp: res.lastUpdated || new Date().toISOString()
+          });
+        }
+        // 2. Low Stock Warning
+        else if (status.code === "YELLOW") {
+          alerts.push({
+            id: `alert-low-${res.id}`,
+            resourceId: res.id,
+            resourceName: res.name,
+            category: res.category,
+            severity: "LOW",
+            typeCode: "YELLOW",
+            title: `Low Stock Warning: ${res.name}`,
+            message: `Available inventory is at ${res.available} ${res.unit}, which is below the safe threshold of ${res.threshold} ${res.unit}.`,
+            recommendation: "Schedule restocking order within 24 hours.",
+            currentVal: res.available,
+            threshold: res.threshold,
+            timestamp: res.lastUpdated || new Date().toISOString()
+          });
+        }
+
+        // 3. Expiry Alerts
+        if (expiry.isExpired) {
+          alerts.push({
+            id: `alert-exp-${res.id}`,
+            resourceId: res.id,
+            resourceName: res.name,
+            category: res.category,
+            severity: "EXPIRED",
+            typeCode: "GRAY",
+            title: `Expired Batch Quarantined: ${res.name}`,
+            message: `Lot reached expiration on ${res.expiryDate}. All ${res.available} ${res.unit} must be securely quarantined.`,
+            recommendation: "Segregate expired units and initiate pharmaceutical safe disposal protocol.",
+            currentVal: res.available,
+            threshold: res.threshold,
+            timestamp: res.lastUpdated || new Date().toISOString()
+          });
+        } else if (expiry.isNearExpiry) {
+          alerts.push({
+            id: `alert-nearexp-${res.id}`,
+            resourceId: res.id,
+            resourceName: res.name,
+            category: res.category,
+            severity: "LOW",
+            typeCode: "YELLOW",
+            title: `Near Expiry Alert: ${res.name}`,
+            message: `Batch expires in ${expiry.days} days (${res.expiryDate}). Prioritize dispatch before newly arrived lots.`,
+            recommendation: "Apply First-Expired, First-Out (FEFO) dispensing policy.",
+            currentVal: res.available,
+            threshold: res.threshold,
+            timestamp: res.lastUpdated || new Date().toISOString()
+          });
+        }
+
+        // 4. Equipment Maintenance Alert
+        if (res.maintenance && res.maintenance > 0) {
+          alerts.push({
+            id: `alert-maint-${res.id}`,
+            resourceId: res.id,
+            resourceName: res.name,
+            category: res.category,
+            severity: "MAINTENANCE",
+            typeCode: "GRAY",
+            title: `Equipment Under Maintenance: ${res.name}`,
+            message: `${res.maintenance} unit(s) are undergoing biomedical calibration/repair and cannot be deployed to patients.`,
+            recommendation: "Follow up with Biomedical Engineering team for repair sign-off.",
+            currentVal: res.maintenance,
+            threshold: 0,
+            timestamp: res.lastUpdated || new Date().toISOString()
+          });
+        }
+      });
+
+      return alerts;
+    }
+
+    /* ====================================================================
+       D. VIEW NAVIGATION CONTROLLER
+       ==================================================================== */
+    function switchView(viewName) {
+      // Hide all views
+      document.querySelectorAll(".view-section").forEach(sec => sec.classList.remove("active"));
+      
+      // Update sidebar nav items
+      document.querySelectorAll(".sidebar-nav .nav-item").forEach(item => {
+        item.classList.remove("active");
+        if (item.getAttribute("onclick") && item.getAttribute("onclick").includes(viewName)) {
+          item.classList.add("active");
+        }
+      });
+
+      // Show target view
+      const targetSec = document.getElementById(`view-${viewName}`);
+      if (targetSec) {
+        targetSec.classList.add("active");
+      }
+
+      // Close mobile sidebar if open
+      closeMobileSidebar();
+
+      // Render view-specific elements
+      if (viewName === "dashboard") renderDashboard();
+      if (viewName === "inventory") renderInventoryTable();
+      if (viewName === "beds") renderBedsView();
+      if (viewName === "oxygen") renderOxygenView();
+      if (viewName === "ventilators") renderVentilatorsView();
+      if (viewName === "medicines") renderMedicinesView();
+      if (viewName === "blood") renderBloodView();
+      if (viewName === "alerts") renderAlertsView();
+      if (viewName === "analytics") renderAnalyticsCharts();
+      if (viewName === "settings") renderSettingsView();
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    /* ====================================================================
+       E. STATS CALCULATIONS & DASHBOARD RENDERING
+       ==================================================================== */
+    function calculateStatistics() {
+      // 1. ICU Beds
+      const icuRes = resources.find(r => r.id === "res-icu-1") || { total: 30, available: 12, occupied: 18 };
+      
+      // 2. Oxygen
+      const o2Items = resources.filter(r => r.category === "oxygen");
+      const totalO2Avail = o2Items.reduce((acc, curr) => acc + curr.available, 0);
+      const lowO2Count = o2Items.filter(r => r.available < r.threshold).length;
+
+      // 3. Ventilators
+      const ventItems = resources.filter(r => r.category === "ventilators");
+      const totalVentAvail = ventItems.reduce((acc, curr) => acc + curr.available, 0);
+      const totalVentAll = ventItems.reduce((acc, curr) => acc + curr.total, 0);
+      const totalVentMaint = ventItems.reduce((acc, curr) => acc + (curr.maintenance || 0), 0);
+
+      // 4. Medicines
+      const medItems = resources.filter(r => r.category === "medicines");
+      const totalMedUnits = medItems.reduce((acc, curr) => acc + curr.available, 0);
+      const expiredMeds = medItems.filter(r => checkExpiryStatus(r.expiryDate).isExpired).length;
+
+      // 5. Blood Bank
+      const bloodItems = resources.filter(r => r.category === "blood");
+      const totalBloodUnits = bloodItems.reduce((acc, curr) => acc + curr.available, 0);
+      const criticalBlood = bloodItems.filter(r => r.available <= Math.ceil(r.threshold * 0.25)).length;
+
+      // 6. Alerts
+      const allAlerts = generateAlertList();
+      const criticalAlerts = allAlerts.filter(a => a.typeCode === "RED").length;
+      const warningAlerts = allAlerts.filter(a => a.typeCode === "YELLOW").length;
+
+      // Readiness Index (Percentage of items with Sufficient stock)
+      const sufficientCount = resources.filter(r => computeResourceStatus(r).code === "GREEN").length;
+      const readinessPct = Math.round((sufficientCount / resources.length) * 100);
+
+      return {
+        icuTotal: icuRes.total,
+        icuAvail: icuRes.available,
+        icuOccupied: icuRes.occupied,
+        icuAvailPct: Math.round((icuRes.available / icuRes.total) * 100),
+        icuOccPct: Math.round((icuRes.occupied / icuRes.total) * 100),
+        o2Avail: totalO2Avail,
+        lowO2Count,
+        ventAvail: totalVentAvail,
+        ventTotal: totalVentAll,
+        ventMaint: totalVentMaint,
+        medUnits: totalMedUnits,
+        expiredMeds,
+        bloodUnits: totalBloodUnits,
+        criticalBlood,
+        totalAlerts: allAlerts.length,
+        criticalAlerts,
+        warningAlerts,
+        readinessPct
+      };
+    }
+
+    function renderDashboard() {
+      const stats = calculateStatistics();
+
+      // Update Summary Cards
+      document.getElementById("card-total-icu").innerHTML = `${stats.icuTotal} <small>Capacity</small>`;
+      document.getElementById("card-avail-icu").innerHTML = `${stats.icuAvail} <small>Beds Ready</small>`;
+      document.getElementById("card-avail-icu-pct").textContent = `${stats.icuAvailPct}% Available`;
+      
+      const icuPill = document.getElementById("card-icu-status-pill");
+      if (stats.icuAvail < 8) {
+        icuPill.style.background = "var(--status-yellow-bg)";
+        icuPill.style.color = "var(--status-yellow-text)";
+        icuPill.textContent = "Low Beds";
+      } else {
+        icuPill.style.background = "var(--status-green-bg)";
+        icuPill.style.color = "var(--status-green-text)";
+        icuPill.textContent = "Sufficient";
+      }
+
+      document.getElementById("card-occupied-icu").innerHTML = `${stats.icuOccupied} <small>Admitted</small>`;
+      document.getElementById("card-occupied-icu-pct").textContent = `${stats.icuOccPct}% Occupancy`;
+
+      document.getElementById("card-avail-o2").innerHTML = `${stats.o2Avail} <small>Avail Units</small>`;
+      document.getElementById("card-o2-pill").textContent = stats.lowO2Count > 0 ? `${stats.lowO2Count} Items Low` : "Healthy";
+
+      document.getElementById("card-avail-vent").innerHTML = `${stats.ventAvail} <small>/ ${stats.ventTotal} Total</small>`;
+      document.getElementById("card-vent-maint").textContent = `${stats.ventMaint} in Maintenance`;
+
+      document.getElementById("card-total-meds").innerHTML = `${stats.medUnits} <small>Units</small>`;
+      document.getElementById("card-meds-pill").textContent = stats.expiredMeds > 0 ? `${stats.expiredMeds} Expired Lot` : "All Lots Valid";
+
+      document.getElementById("card-total-blood").innerHTML = `${stats.bloodUnits} <small>Units</small>`;
+      document.getElementById("card-blood-pill").textContent = stats.criticalBlood > 0 ? `${stats.criticalBlood} Groups Critical` : "Adequate";
+
+      document.getElementById("card-total-alerts").innerHTML = `${stats.totalAlerts} <small>Active</small>`;
+      document.getElementById("card-alerts-subtext").textContent = `${stats.criticalAlerts} Critical, ${stats.warningAlerts} Warning`;
+
+      // Update Sidebar Badges
+      document.getElementById("nav-inventory-count").textContent = resources.length;
+      document.getElementById("nav-icu-avail").textContent = stats.icuAvail;
+      document.getElementById("nav-o2-avail").textContent = stats.o2Avail;
+      document.getElementById("nav-vent-avail").textContent = stats.ventAvail;
+      document.getElementById("nav-alerts-badge").textContent = stats.totalAlerts;
+      document.getElementById("header-bell-count").textContent = stats.totalAlerts;
+
+      // Update Readiness Dial
+      document.getElementById("readiness-dial-val").textContent = `${stats.readinessPct}%`;
+      const dialPath = document.getElementById("readiness-dial-path");
+      dialPath.setAttribute("stroke-dasharray", `${stats.readinessPct}, 100`);
+
+      // Category Mini Bars
+      renderCategoryBars("dashboard-category-bars");
+
+      // Urgent Attention Shortages
+      renderUrgentItemsList();
+    }
+
+    function renderCategoryBars(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const categories = [
+        { key: "icu_beds", label: "ICU Beds" },
+        { key: "oxygen", label: "Oxygen Equipment" },
+        { key: "ventilators", label: "Ventilators" },
+        { key: "medicines", label: "Medicines" },
+        { key: "blood", label: "Blood Bank" }
+      ];
+
+      let html = "";
+      categories.forEach(cat => {
+        const items = resources.filter(r => r.category === cat.key);
+        const total = items.reduce((acc, curr) => acc + curr.total, 0);
+        const avail = items.reduce((acc, curr) => acc + curr.available, 0);
+        const pct = total > 0 ? Math.round((avail / total) * 100) : 0;
+
+        let barColor = "var(--primary)";
+        if (pct < 25) barColor = "var(--status-red)";
+        else if (pct < 50) barColor = "var(--status-yellow)";
+        else barColor = "var(--status-green)";
+
+        html += `
+          <div class="bar-row">
+            <div class="bar-label-group">
+              <span>${cat.label}</span>
+              <span>${avail} / ${total} (${pct}%)</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: ${pct}%; background-color: ${barColor};"></div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderUrgentItemsList() {
+      const container = document.getElementById("urgent-items-list");
+      if (!container) return;
+
+      const allAlerts = generateAlertList();
+      const topAlerts = allAlerts.filter(a => a.typeCode === "RED" || a.typeCode === "GRAY").slice(0, 4);
+
+      if (topAlerts.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:30px 10px; color:var(--status-green);">
+            <span class="icon" style="width:36px; height:36px; margin:0 auto 6px;"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+            <div style="font-weight:700;">No Critical Shortages</div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">All core resources meet minimum safe inventory thresholds.</div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = "";
+      topAlerts.forEach(alt => {
+        const isWarning = alt.typeCode === "YELLOW";
+        html += `
+          <div class="urgent-item ${isWarning ? 'warning' : ''}">
+            <div class="urgent-item-info">
+              <h4>${escapeHtml(alt.title)}</h4>
+              <p>${escapeHtml(alt.message)}</p>
+            </div>
+            <div class="urgent-item-action">
+              <button class="btn-sm-action" onclick="quickRestockPrompt('${alt.resourceId}')">+ Restock</button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    /* ====================================================================
+       F. RESOURCE INVENTORY TABLE & FILTERING
+       ==================================================================== */
+    function filterAndRenderInventory() {
+      const searchTerm = (document.getElementById("inventory-search").value || "").toLowerCase().trim();
+      const catFilter = document.getElementById("filter-category").value;
+      const statusFilter = document.getElementById("filter-status").value;
+      const sortBy = document.getElementById("sort-by").value;
+
+      let filtered = resources.filter(res => {
+        // Search
+        const matchSearch = res.name.toLowerCase().includes(searchTerm) || 
+                            (res.notes && res.notes.toLowerCase().includes(searchTerm)) ||
+                            res.category.toLowerCase().includes(searchTerm);
+        if (!matchSearch) return false;
+
+        // Category
+        if (catFilter !== "ALL" && res.category !== catFilter) return false;
+
+        // Status
+        const st = computeResourceStatus(res);
+        if (statusFilter !== "ALL" && st.code !== statusFilter) return false;
+
+        return true;
+      });
+
+      // Sorting
+      filtered.sort((a, b) => {
+        if (sortBy === "name_asc") return a.name.localeCompare(b.name);
+        if (sortBy === "name_desc") return b.name.localeCompare(a.name);
+        if (sortBy === "avail_asc") return a.available - b.available;
+        if (sortBy === "avail_desc") return b.available - a.available;
+        if (sortBy === "status_urgency") {
+          return computeResourceStatus(b).severity - computeResourceStatus(a).severity;
+        }
+        return 0;
+      });
+
+      const tbody = document.getElementById("inventory-table-body");
+      const showingText = document.getElementById("table-showing-text");
+
+      showingText.textContent = `Showing ${filtered.length} of ${resources.length} resources`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <div class="empty-state-icon"><span class="icon" style="width:40px; height:40px;"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span></div>
+                <div style="font-weight:700; font-size:1rem; margin-bottom:4px;">No matching resources found</div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Try adjusting your search criteria or resetting filters.</div>
+                <button class="btn-secondary" onclick="resetFilters()">Reset All Filters</button>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let html = "";
+      filtered.forEach(res => {
+        const st = computeResourceStatus(res);
+        const catLabel = formatCategoryLabel(res.category);
+        const updatedFormatted = formatTimestamp(res.lastUpdated);
+
+        html += `
+          <tr>
+            <td>
+              <div class="resource-cell">
+                <span class="resource-name">${escapeHtml(res.name)}</span>
+                <span class="resource-subinfo">${escapeHtml(res.notes || 'No notes')}</span>
+              </div>
+            </td>
+            <td>
+              <span class="category-badge">${catLabel}</span>
+            </td>
+            <td style="text-align:center; font-weight:600;">
+              ${res.total} <small style="color:var(--text-muted);">${res.unit || ''}</small>
+            </td>
+            <td style="text-align:center;">
+              <div class="qty-adjuster">
+                <button class="qty-btn" onclick="adjustAvailableStock('${res.id}', -1)" title="Decrease available stock">&minus;</button>
+                <span class="qty-val" style="color: ${st.code === 'RED' ? 'var(--status-red)' : 'inherit'}; font-weight:700;">${res.available}</span>
+                <button class="qty-btn" onclick="adjustAvailableStock('${res.id}', 1)" title="Increase available stock">&plus;</button>
+              </div>
+            </td>
+            <td style="text-align:center; color:var(--text-muted);">
+              ${res.occupied || 0}
+              ${res.maintenance ? ` <span style="font-size:0.75rem; color:var(--status-yellow);" title="Under Maintenance">(${res.maintenance} Maint)</span>` : ''}
+            </td>
+            <td style="text-align:center; font-weight:600; color:var(--text-muted);">
+              ${res.threshold}
+            </td>
+            <td>
+              <span class="status-badge ${st.code.toLowerCase()}">
+                <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor;"></span>
+                ${st.label}
+              </span>
+            </td>
+            <td style="font-size:0.75rem; color:var(--text-muted);">
+              ${updatedFormatted}
+            </td>
+            <td style="text-align:right;">
+              <div class="action-btn-group" style="justify-content: flex-end;">
+                <button class="btn-icon-table" onclick="openEditResourceModal('${res.id}')" title="Edit Resource">
+                  <span class="icon" style="width:14px; height:14px;"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+                </button>
+                <button class="btn-icon-table delete" onclick="openDeleteModal('${res.id}')" title="Delete Resource">
+                  <span class="icon" style="width:14px; height:14px;"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function renderInventoryTable() {
+      filterAndRenderInventory();
+    }
+
+    function resetFilters() {
+      document.getElementById("inventory-search").value = "";
+      document.getElementById("filter-category").value = "ALL";
+      document.getElementById("filter-status").value = "ALL";
+      document.getElementById("sort-by").value = "name_asc";
+      filterAndRenderInventory();
+    }
+
+    /* ====================================================================
+       G. QUANTITY ADJUSTMENTS & VALIDATION
+       ==================================================================== */
+    function adjustAvailableStock(resId, delta) {
+      const item = resources.find(r => r.id === resId);
+      if (!item) return;
+
+      const newAvail = item.available + delta;
+
+      // Rule: Cannot be negative
+      if (newAvail < 0) {
+        showToast("Validation Error", "Available stock cannot be less than zero.", "error");
+        return;
+      }
+
+      // Rule: Available + Occupied + Maintenance cannot exceed Total Capacity
+      const totalUsed = (item.occupied || 0) + (item.maintenance || 0);
+      if (newAvail + totalUsed > item.total) {
+        // Adjust occupied down if increasing available, or warn
+        if (delta > 0 && item.occupied > 0) {
+          item.occupied = Math.max(0, item.occupied - delta);
+        } else if (newAvail > item.total) {
+          showToast("Capacity Exceeded", `Available quantity (${newAvail}) cannot exceed total capacity (${item.total}).`, "warning");
+          return;
+        }
+      }
+
+      item.available = newAvail;
+      item.lastUpdated = new Date().toISOString();
+
+      saveState();
+      filterAndRenderInventory();
+      renderDashboard();
+
+      showToast("Stock Updated", `${item.name} available stock adjusted to ${item.available}.`, "success");
+    }
+
+    function quickRestockPrompt(resId) {
+      const item = resources.find(r => r.id === resId);
+      if (!item) return;
+      
+      const restockAmt = item.threshold;
+      item.available += restockAmt;
+      if (item.available > item.total) item.total = item.available + (item.occupied || 0);
+      item.lastUpdated = new Date().toISOString();
+
+      saveState();
+      renderDashboard();
+      renderAlertsView();
+      showToast("Restock Complete", `Added ${restockAmt} units to ${item.name}.`, "success");
+    }
+
+    /* ====================================================================
+       H. ICU BEDS WARD VIEW (INTERACTIVE 30-BED MATRIX)
+       ==================================================================== */
+    function renderBedsView() {
+      const matrixGrid = document.getElementById("bed-matrix-grid");
+      if (!matrixGrid) return;
+
+      const availCount = beds.filter(b => b.status === "available").length;
+      const occCount = beds.filter(b => b.status === "occupied").length;
+      const cleanCount = beds.filter(b => b.status === "maintenance").length;
+
+      document.getElementById("matrix-avail-count").textContent = availCount;
+      document.getElementById("matrix-occupied-count").textContent = occCount;
+      document.getElementById("matrix-cleaning-count").textContent = cleanCount;
+
+      let html = "";
+      beds.forEach(bed => {
+        let statusClass = "available";
+        let statusText = "Ready";
+        if (bed.status === "occupied") {
+          statusClass = "occupied";
+          statusText = "Occupied";
+        } else if (bed.status === "maintenance") {
+          statusClass = "maintenance";
+          statusText = "Cleaning";
+        }
+
+        html += `
+          <div class="bed-card ${statusClass}" onclick="openBedModal(${bed.id})">
+            <span class="icon" style="width:20px; height:20px;"><svg viewBox="0 0 24 24"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg></span>
+            <div class="bed-number">#${bed.id}</div>
+            <div class="bed-status-label">${statusText}</div>
+            <div class="bed-patient-code">${bed.patientCode ? escapeHtml(bed.patientCode) : 'Empty'}</div>
+          </div>
+        `;
+      });
+
+      matrixGrid.innerHTML = html;
+
+      // Render Sub-Cards
+      const detailContainer = document.getElementById("beds-detail-cards");
+      const icuItems = resources.filter(r => r.category === "icu_beds");
+      let cardsHtml = "";
+      icuItems.forEach(item => {
+        const pct = Math.round((item.available / item.total) * 100);
+        cardsHtml += `
+          <div class="dash-widget">
+            <div class="widget-title">
+              <span>${escapeHtml(item.name)}</span>
+              <span class="status-badge ${computeResourceStatus(item).code.toLowerCase()}">${computeResourceStatus(item).label}</span>
+            </div>
+            <div style="font-size:1.6rem; font-weight:800; margin-bottom:8px;">
+              ${item.available} <small style="font-size:0.85rem; font-weight:normal; color:var(--text-muted);">/ ${item.total} Beds Free</small>
+            </div>
+            <div class="bar-track" style="margin-bottom:8px;">
+              <div class="bar-fill" style="width:${pct}%; background-color:var(--status-green);"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted);">
+              <span>Occupied: ${item.occupied}</span>
+              <span>Min Threshold: ${item.threshold}</span>
+            </div>
+          </div>
+        `;
+      });
+      detailContainer.innerHTML = cardsHtml;
+    }
+
+    function openBedModal(bedId) {
+      const bed = beds.find(b => b.id === bedId);
+      if (!bed) return;
+
+      document.getElementById("modal-bed-id").value = bed.id;
+      document.getElementById("modal-bed-title").textContent = `Bed #${bed.id} (${bed.ward})`;
+      document.getElementById("modal-bed-status-select").value = bed.status;
+      document.getElementById("modal-bed-code").value = bed.patientCode || "";
+
+      document.getElementById("modal-bed").classList.add("active");
+    }
+
+    function closeBedModal() {
+      document.getElementById("modal-bed").classList.remove("active");
+    }
+
+    function saveBedStatusFromModal() {
+      const bedId = parseInt(document.getElementById("modal-bed-id").value);
+      const newStatus = document.getElementById("modal-bed-status-select").value;
+      const patientCode = document.getElementById("modal-bed-code").value.trim();
+
+      const bed = beds.find(b => b.id === bedId);
+      if (!bed) return;
+
+      bed.status = newStatus;
+      bed.patientCode = newStatus === "occupied" ? (patientCode || `PT-${Math.floor(1000 + Math.random() * 9000)}`) : "";
+
+      // Sync with primary ICU Bed resource count (Bed 101-130)
+      const icuRes = resources.find(r => r.id === "res-icu-1");
+      if (icuRes) {
+        const occBeds = beds.filter(b => b.status === "occupied").length;
+        const cleanBeds = beds.filter(b => b.status === "maintenance").length;
+        icuRes.occupied = occBeds;
+        icuRes.maintenance = cleanBeds;
+        icuRes.available = Math.max(0, icuRes.total - occBeds - cleanBeds);
+        icuRes.lastUpdated = new Date().toISOString();
+      }
+
+      saveState();
+      closeBedModal();
+      renderBedsView();
+      renderDashboard();
+
+      showToast("Bed Updated", `Bed #${bedId} status updated to ${newStatus}.`, "success");
+    }
+
+    function resetAllBedsToDemo() {
+      beds = generateInitialBeds();
+      const icuRes = resources.find(r => r.id === "res-icu-1");
+      if (icuRes) {
+        icuRes.total = 30;
+        icuRes.occupied = 18;
+        icuRes.available = 12;
+        icuRes.maintenance = 0;
+        icuRes.lastUpdated = new Date().toISOString();
+      }
+      saveState();
+      renderBedsView();
+      renderDashboard();
+      showToast("Reset Complete", "30-Bed ICU Matrix reset to default demo layout.", "success");
+    }
+
+    /* ====================================================================
+       I. OXYGEN & VENTILATORS DEDICATED VIEWS
+       ==================================================================== */
+    function renderOxygenView() {
+      const o2Items = resources.filter(r => r.category === "oxygen");
+      const tbody = document.getElementById("oxygen-table-body");
+      if (!tbody) return;
+
+      let html = "";
+      o2Items.forEach(item => {
+        const st = computeResourceStatus(item);
+        html += `
+          <tr>
+            <td>
+              <strong>${escapeHtml(item.name)}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(item.notes || '')}</div>
+            </td>
+            <td>${item.total} ${item.unit}</td>
+            <td style="font-weight:700; color:${st.code === 'RED' ? 'var(--status-red)' : 'inherit'};">${item.available}</td>
+            <td>${item.occupied}</td>
+            <td>${item.threshold}</td>
+            <td><span class="status-badge ${st.code.toLowerCase()}">${st.label}</span></td>
+            <td>
+              <button class="btn-sm-action" onclick="adjustAvailableStock('${item.id}', 5)">+ Refill 5</button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function renderVentilatorsView() {
+      const ventItems = resources.filter(r => r.category === "ventilators");
+      const tbody = document.getElementById("vent-table-body");
+      if (!tbody) return;
+
+      let html = "";
+      ventItems.forEach(item => {
+        const st = computeResourceStatus(item);
+        html += `
+          <tr>
+            <td>
+              <strong>${escapeHtml(item.name)}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(item.notes || '')}</div>
+            </td>
+            <td>${item.total}</td>
+            <td style="font-weight:700; color:${item.available === 0 ? 'var(--status-red)' : 'inherit'};">${item.available}</td>
+            <td>${item.occupied}</td>
+            <td>
+              <span style="color:var(--status-yellow); font-weight:600;">${item.maintenance || 0}</span>
+            </td>
+            <td><span class="status-badge ${st.code.toLowerCase()}">${st.label}</span></td>
+            <td>
+              <button class="btn-sm-action" onclick="toggleVentilatorMaintenance('${item.id}')">Toggle Maint</button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function toggleVentilatorMaintenance(resId) {
+      const item = resources.find(r => r.id === resId);
+      if (!item) return;
+
+      if (item.maintenance > 0) {
+        // Return 1 unit from maintenance to available
+        item.maintenance -= 1;
+        item.available += 1;
+        showToast("Maintenance Complete", `1 unit of ${item.name} calibrated and returned to patient service.`, "success");
+      } else if (item.available > 0) {
+        // Send 1 available unit to maintenance
+        item.available -= 1;
+        item.maintenance += 1;
+        showToast("Maintenance Initiated", `1 unit of ${item.name} routed to biomedical calibration.`, "warning");
+      } else {
+        showToast("No Units", "No units available to switch maintenance status.", "error");
+        return;
+      }
+
+      item.lastUpdated = new Date().toISOString();
+      saveState();
+      renderVentilatorsView();
+      renderDashboard();
+    }
+
+    /* ====================================================================
+       J. MEDICINES & PHARMACY VIEW
+       ==================================================================== */
+    function renderMedicinesView() {
+      const medItems = resources.filter(r => r.category === "medicines");
+      const tbody = document.getElementById("medicines-table-body");
+      if (!tbody) return;
+
+      let html = "";
+      medItems.forEach(item => {
+        const st = computeResourceStatus(item);
+        const exp = checkExpiryStatus(item.expiryDate);
+
+        let expBadge = `<span style="color:var(--status-green); font-size:0.75rem;">Valid until ${item.expiryDate}</span>`;
+        if (exp.isExpired) {
+          expBadge = `<span class="status-badge gray" style="color:var(--status-red);">EXPIRED (${item.expiryDate})</span>`;
+        } else if (exp.isNearExpiry) {
+          expBadge = `<span class="status-badge yellow">Near Expiry (${exp.days}d)</span>`;
+        }
+
+        html += `
+          <tr>
+            <td>
+              <strong>${escapeHtml(item.name)}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(item.notes || '')}</div>
+            </td>
+            <td><span class="category-badge">Injectable Formulary</span></td>
+            <td style="text-align:center; font-weight:700; color:${item.available === 0 ? 'var(--status-red)' : 'inherit'};">
+              ${item.available} ${item.unit}
+            </td>
+            <td style="text-align:center;">${item.threshold}</td>
+            <td>${expBadge}</td>
+            <td><span class="status-badge ${st.code.toLowerCase()}">${st.label}</span></td>
+            <td style="text-align:right;">
+              <button class="btn-sm-action" onclick="adjustAvailableStock('${item.id}', 10)">+ Restock 10</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    /* ====================================================================
+       K. BLOOD BANK VIEW (ALL 8 GROUPS)
+       ==================================================================== */
+    function renderBloodView() {
+      const bloodItems = resources.filter(r => r.category === "blood");
+      const grid = document.getElementById("blood-bank-grid");
+      if (!grid) return;
+
+      let html = "";
+      bloodItems.forEach(item => {
+        const st = computeResourceStatus(item);
+        const groupCode = item.name.match(/Group ([A-Z+-]+)/i) ? item.name.match(/Group ([A-Z+-]+)/i)[1] : "O+";
+        const pct = Math.min(100, Math.round((item.available / (item.threshold * 2)) * 100));
+
+        let alertNotice = "";
+        if (st.code === "RED") {
+          alertNotice = `<div style="font-size:0.75rem; color:var(--status-red); font-weight:700; margin-top:6px;">Critical Shortage!</div>`;
+        } else if (st.code === "YELLOW") {
+          alertNotice = `<div style="font-size:0.75rem; color:var(--status-yellow); font-weight:600; margin-top:6px;">Below Safe Reserve</div>`;
+        }
+
+        html += `
+          <div class="blood-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Type Group</span>
+                <div style="font-size:1.1rem; font-weight:800; color:var(--text-main);">${escapeHtml(groupCode)}</div>
+              </div>
+              <div class="blood-type-badge">${escapeHtml(groupCode)}</div>
+            </div>
+
+            <div class="blood-progress-bar">
+              <div class="blood-progress-fill" style="width:${pct}%; background:${st.code === 'RED' ? 'var(--status-red)' : (st.code === 'YELLOW' ? 'var(--status-yellow)' : '#10b981')};"></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-top:4px;">
+              <span>Available: <strong>${item.available} units</strong></span>
+              <span style="color:var(--text-muted);">Min: ${item.threshold}</span>
+            </div>
+
+            ${alertNotice}
+
+            <div style="display:flex; gap:8px; margin-top:14px;">
+              <button class="btn-secondary" style="flex:1; padding:5px 8px; font-size:0.75rem;" onclick="adjustAvailableStock('${item.id}', -1)">- Issue Unit</button>
+              <button class="btn-primary" style="flex:1; padding:5px 8px; font-size:0.75rem;" onclick="adjustAvailableStock('${item.id}', 1)">+ Intake</button>
+            </div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+
+      // Vertical Chart Area in Blood View
+      renderBloodVerticalChart("blood-chart-vertical-area");
+    }
+
+    function renderBloodVerticalChart(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const bloodItems = resources.filter(r => r.category === "blood");
+      const maxUnits = 40;
+
+      let html = "";
+      bloodItems.forEach(item => {
+        const groupCode = item.name.match(/Group ([A-Z+-]+)/i) ? item.name.match(/Group ([A-Z+-]+)/i)[1] : "O+";
+        const heightPct = Math.min(100, Math.round((item.available / maxUnits) * 100));
+        
+        let barClass = "";
+        if (item.available <= Math.ceil(item.threshold * 0.25)) barClass = "critical";
+        else if (item.available < item.threshold) barClass = "low";
+
+        html += `
+          <div class="v-col">
+            <span class="v-val">${item.available}</span>
+            <div class="v-bar ${barClass}" style="height:${heightPct}%;" title="${item.name}: ${item.available} Units"></div>
+            <span class="v-label">${groupCode}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    /* ====================================================================
+       L. SMART ALERTS VIEW & NOTIFICATION DRAWER
+       ==================================================================== */
+    function renderAlertsView() {
+      const container = document.getElementById("alerts-container");
+      if (!container) return;
+
+      const filterVal = document.getElementById("alerts-filter-select").value;
+      const allAlerts = generateAlertList();
+
+      const filtered = allAlerts.filter(alt => {
+        if (filterVal === "CRITICAL") return alt.typeCode === "RED";
+        if (filterVal === "LOW") return alt.typeCode === "YELLOW";
+        if (filterVal === "MAINT") return alt.typeCode === "GRAY";
+        if (filterVal === "UNACK") return !acknowledgedAlerts.has(alt.id);
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="dash-widget" style="text-align:center; padding:40px 20px;">
+            <span class="icon" style="width:48px; height:48px; color:var(--status-green); margin:0 auto 10px;"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <h3 style="font-size:1.1rem; font-weight:700;">No Alerts Matching Filter</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">All resources meet the selected criteria.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = "";
+      filtered.forEach(alt => {
+        const isAcked = acknowledgedAlerts.has(alt.id);
+        let cardClass = "";
+        if (alt.typeCode === "YELLOW") cardClass = "warning";
+        if (alt.typeCode === "GRAY") cardClass = "maintenance";
+        if (isAcked) cardClass += " acknowledged";
+
+        html += `
+          <div class="alert-card ${cardClass}" id="card-${alt.id}">
+            <div class="alert-main">
+              <div class="alert-icon-box ${alt.typeCode.toLowerCase()}">
+                <span class="icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+              </div>
+              <div class="alert-info">
+                <h3>
+                  <span>${escapeHtml(alt.title)}</span>
+                  ${isAcked ? '<span class="status-badge green" style="font-size:0.65rem;">Acknowledged</span>' : ''}
+                </h3>
+                <p>${escapeHtml(alt.message)}</p>
+                <div class="alert-recommendation">
+                  <span class="icon" style="width:14px; height:14px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg></span>
+                  <span><strong>Recommended Administrative Action:</strong> ${escapeHtml(alt.recommendation)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert-actions">
+              <button class="btn-ack ${isAcked ? 'is-acked' : ''}" onclick="toggleAcknowledgeAlert('${alt.id}')">
+                ${isAcked ? 'Acknowledged' : 'Acknowledge Alert'}
+              </button>
+              <button class="btn-primary" style="padding:6px 12px; font-size:0.78rem;" onclick="quickRestockPrompt('${alt.resourceId}')">
+                Restock Resource
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function toggleAcknowledgeAlert(alertId) {
+      if (acknowledgedAlerts.has(alertId)) {
+        acknowledgedAlerts.delete(alertId);
+        showToast("Alert Updated", "Alert marked as unacknowledged.", "warning");
+      } else {
+        acknowledgedAlerts.add(alertId);
+        showToast("Alert Acknowledged", "Shortage remains active, but flagged as reviewed by staff.", "success");
+      }
+      saveState();
+      renderAlertsView();
+      renderNotificationsDrawer();
+    }
+
+    function renderNotificationsDrawer() {
+      const container = document.getElementById("drawer-alerts-list");
+      if (!container) return;
+
+      const allAlerts = generateAlertList();
+
+      if (allAlerts.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:30px 10px; color:var(--text-muted);">No active shortages.</div>`;
+        return;
+      }
+
+      let html = "";
+      allAlerts.forEach(alt => {
+        const isAcked = acknowledgedAlerts.has(alt.id);
+        html += `
+          <div style="background:var(--bg-card-subtle); padding:12px; border-radius:var(--radius-sm); border-left:4px solid ${alt.typeCode === 'RED' ? 'var(--status-red)' : (alt.typeCode === 'YELLOW' ? 'var(--status-yellow)' : 'var(--status-gray)')};">
+            <div style="font-weight:700; font-size:0.85rem; display:flex; justify-content:space-between;">
+              <span>${escapeHtml(alt.title)}</span>
+              ${isAcked ? '<span style="font-size:0.65rem; color:var(--status-green);">Acked</span>' : ''}
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(alt.message)}</div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function toggleNotifDrawer() {
+      const drawer = document.getElementById("notif-drawer");
+      const overlay = document.getElementById("drawer-overlay");
+      const isOpen = drawer.classList.contains("open");
+
+      if (isOpen) {
+        drawer.classList.remove("open");
+        overlay.style.display = "none";
+      } else {
+        renderNotificationsDrawer();
+        drawer.classList.add("open");
+        overlay.style.display = "block";
+      }
+    }
+
+    /* ====================================================================
+       M. VISUAL ANALYTICS (SVG & VANILLA JS CHARTS)
+       ==================================================================== */
+    function renderAnalyticsCharts() {
+      const stats = calculateStatistics();
+
+      // 1. Donut Chart Calculation
+      const total = stats.icuTotal;
+      const occ = stats.icuOccupied;
+      const occPct = stats.icuOccPct;
+      const availPct = stats.icuAvailPct;
+
+      const donutOcc = document.getElementById("donut-occupied-seg");
+      const donutAvail = document.getElementById("donut-avail-seg");
+      const centerNum = document.getElementById("donut-center-num");
+
+      centerNum.textContent = `${occPct}%`;
+      document.getElementById("donut-legend-occ").textContent = `Occupied: ${occ} Beds (${occPct}%)`;
+      document.getElementById("donut-legend-avail").textContent = `Available: ${stats.icuAvail} Beds (${availPct}%)`;
+
+      // SVG circumference for r=15.9155 is 100
+      donutOcc.setAttribute("stroke-dasharray", `${occPct} ${100 - occPct}`);
+      donutAvail.setAttribute("stroke-dasharray", `${availPct} ${100 - availPct}`);
+      donutAvail.setAttribute("stroke-dashoffset", `-${occPct}`);
+
+      // 2. Category Bars in Analytics
+      renderCategoryBars("analytics-category-bars");
+
+      // 3. Blood Vertical Bars in Analytics
+      renderBloodVerticalChart("analytics-blood-bars");
+    }
+
+    /* ====================================================================
+       N. ADD / EDIT RESOURCE MODAL & FORM LOGIC
+       ==================================================================== */
+    function openAddResourceModal(prefillCategory = null) {
+      document.getElementById("resource-form").reset();
+      document.getElementById("form-res-id").value = "";
+      document.getElementById("modal-resource-title").textContent = "Register New Resource";
+      
+      if (prefillCategory) {
+        document.getElementById("form-res-cat").value = prefillCategory;
+      }
+      
+      handleCategoryFieldToggles();
+      document.getElementById("modal-resource").classList.add("active");
+    }
+
+    function openEditResourceModal(resId) {
+      const res = resources.find(r => r.id === resId);
+      if (!res) return;
+
+      document.getElementById("form-res-id").value = res.id;
+      document.getElementById("modal-resource-title").textContent = `Edit: ${res.name}`;
+      document.getElementById("form-res-name").value = res.name;
+      document.getElementById("form-res-cat").value = res.category;
+      document.getElementById("form-res-unit").value = res.unit || "Units";
+      document.getElementById("form-res-total").value = res.total;
+      document.getElementById("form-res-avail").value = res.available;
+      document.getElementById("form-res-occupied").value = res.occupied || 0;
+      document.getElementById("form-res-threshold").value = res.threshold;
+      document.getElementById("form-res-maint").value = res.maintenance || 0;
+      document.getElementById("form-res-expiry").value = res.expiryDate || "";
+      document.getElementById("form-res-notes").value = res.notes || "";
+
+      handleCategoryFieldToggles();
+      document.getElementById("modal-resource").classList.add("active");
+    }
+
+    function closeResourceModal() {
+      document.getElementById("modal-resource").classList.remove("active");
+    }
+
+    function handleCategoryFieldToggles() {
+      const cat = document.getElementById("form-res-cat").value;
+      const groupMaint = document.getElementById("group-maint");
+      const groupExpiry = document.getElementById("group-expiry");
+
+      if (cat === "ventilators" || cat === "other") {
+        groupMaint.style.display = "block";
+      } else {
+        groupMaint.style.display = "none";
+      }
+
+      if (cat === "medicines" || cat === "blood") {
+        groupExpiry.style.display = "block";
+      } else {
+        groupExpiry.style.display = "none";
+      }
+    }
+
+    function handleResourceFormSubmit(event) {
+      event.preventDefault();
+
+      const resId = document.getElementById("form-res-id").value;
+      const name = document.getElementById("form-res-name").value.trim();
+      const category = document.getElementById("form-res-cat").value;
+      const unit = document.getElementById("form-res-unit").value.trim() || "Units";
+      const total = parseInt(document.getElementById("form-res-total").value) || 0;
+      const available = parseInt(document.getElementById("form-res-avail").value) || 0;
+      const occupied = parseInt(document.getElementById("form-res-occupied").value) || 0;
+      const threshold = parseInt(document.getElementById("form-res-threshold").value) || 1;
+      const maintenance = parseInt(document.getElementById("form-res-maint").value) || 0;
+      const expiryDate = document.getElementById("form-res-expiry").value || null;
+      const notes = document.getElementById("form-res-notes").value.trim();
+
+      // Input Validation
+      if (!name) {
+        showToast("Validation Error", "Please provide a valid resource name.", "error");
+        return;
+      }
+
+      if (total < 1 || available < 0 || occupied < 0 || threshold < 1) {
+        showToast("Validation Error", "Quantities and thresholds must be non-negative positive values.", "error");
+        return;
+      }
+
+      if (available + occupied + maintenance > total) {
+        showToast("Validation Error", "Available + Occupied + Maintenance exceeds total inventory capacity.", "error");
+        return;
+      }
+
+      if (resId) {
+        // Edit existing
+        const item = resources.find(r => r.id === resId);
+        if (item) {
+          item.name = name;
+          item.category = category;
+          item.unit = unit;
+          item.total = total;
+          item.available = available;
+          item.occupied = occupied;
+          item.threshold = threshold;
+          item.maintenance = maintenance;
+          item.expiryDate = expiryDate;
+          item.notes = notes;
+          item.lastUpdated = new Date().toISOString();
+          showToast("Saved", `${name} updated successfully.`, "success");
+        }
+      } else {
+        // Create new
+        const newResource = {
+          id: `res-custom-${Date.now()}`,
+          name,
+          category,
+          unit,
+          total,
+          available,
+          occupied,
+          threshold,
+          maintenance,
+          expiryDate,
+          notes,
+          lastUpdated: new Date().toISOString()
+        };
+        resources.unshift(newResource);
+        showToast("Registered", `${name} registered into inventory.`, "success");
+      }
+
+      saveState();
+      closeResourceModal();
+      filterAndRenderInventory();
+      renderDashboard();
+    }
+
+    /* ====================================================================
+       O. DELETE RESOURCE MODAL & LOGIC
+       ==================================================================== */
+    function openDeleteModal(resId) {
+      const item = resources.find(r => r.id === resId);
+      if (!item) return;
+
+      document.getElementById("delete-res-id").value = item.id;
+      document.getElementById("delete-res-name").textContent = `"${item.name}"`;
+      document.getElementById("modal-delete").classList.add("active");
+    }
+
+    function closeDeleteModal() {
+      document.getElementById("modal-delete").classList.remove("active");
+    }
+
+    function executeDeleteResource() {
+      const resId = document.getElementById("delete-res-id").value;
+      const index = resources.findIndex(r => r.id === resId);
+      if (index !== -1) {
+        const deletedName = resources[index].name;
+        resources.splice(index, 1);
+        saveState();
+        closeDeleteModal();
+        filterAndRenderInventory();
+        renderDashboard();
+        showToast("Resource Deleted", `${deletedName} was removed.`, "success");
+      }
+    }
+
+    /* ====================================================================
+       P. RESET TO FACTORY DEMO DATA
+       ==================================================================== */
+    function openResetModal() {
+      document.getElementById("modal-reset").classList.add("active");
+    }
+
+    function closeResetModal() {
+      document.getElementById("modal-reset").classList.remove("active");
+    }
+
+    function executeResetDemoData() {
+      resources = JSON.parse(JSON.stringify(DEFAULT_RESOURCES));
+      beds = generateInitialBeds();
+      acknowledgedAlerts.clear();
+      appSettings.hospitalName = "Apex Metro General Hospital";
+      appSettings.adminName = "Dr. Alistair Vance, CMO";
+
+      saveState();
+      applySettings();
+      closeResetModal();
+
+      filterAndRenderInventory();
+      renderDashboard();
+      showToast("System Reset", "All data successfully restored to factory demo state.", "success");
+    }
+
+    /* ====================================================================
+       Q. SETTINGS, THEME & IMPORT/EXPORT
+       ==================================================================== */
+    function saveHospitalSettings() {
+      const hosp = document.getElementById("setting-hospital-name").value.trim();
+      const admin = document.getElementById("setting-admin-name").value.trim();
+
+      if (hosp) appSettings.hospitalName = hosp;
+      if (admin) appSettings.adminName = admin;
+
+      saveState();
+      applySettings();
+      showToast("Settings Saved", "Facility metadata updated across system.", "success");
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      
+      document.documentElement.setAttribute("data-theme", newTheme);
+      appSettings.theme = newTheme;
+      document.getElementById("setting-dark-toggle").checked = (newTheme === "dark");
+
+      saveState();
+      showToast("Theme Changed", `Switched to ${newTheme} interface theme.`, "success");
+    }
+
+    function exportDataJSON() {
+      const exportObject = {
+        app: "MediTrack Hospital Resources",
+        version: "2.0.0",
+        exportDate: new Date().toISOString(),
+        settings: appSettings,
+        resources: resources,
+        beds: beds
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObject, null, 2));
+      const downloadAnchor = document.createElement("a");
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `meditrack_inventory_backup_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      showToast("Export Complete", "Inventory backup JSON file downloaded.", "success");
+    }
+
+    function importDataJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && Array.isArray(parsed.resources)) {
+            resources = parsed.resources;
+            if (Array.isArray(parsed.beds)) beds = parsed.beds;
+            if (parsed.settings) appSettings = Object.assign(appSettings, parsed.settings);
+
+            saveState();
+            applySettings();
+            filterAndRenderInventory();
+            renderDashboard();
+            showToast("Import Success", `Loaded ${resources.length} resources from backup file.`, "success");
+          } else {
+            showToast("Invalid File", "Uploaded JSON does not contain valid MediTrack resource records.", "error");
+          }
+        } catch (err) {
+          showToast("Import Error", "Failed to parse the uploaded JSON file.", "error");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function renderSettingsView() {
+      document.getElementById("setting-hospital-name").value = appSettings.hospitalName;
+      document.getElementById("setting-admin-name").value = appSettings.adminName;
+      document.getElementById("setting-dark-toggle").checked = (appSettings.theme === "dark");
+    }
+
+    /* ====================================================================
+       R. MOBILE RESPONSIVE SIDEBAR
+       ==================================================================== */
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebar-overlay");
+      const isOpen = sidebar.classList.contains("mobile-open");
+
+      if (isOpen) {
+        sidebar.classList.remove("mobile-open");
+        overlay.style.display = "none";
+      } else {
+        sidebar.classList.add("mobile-open");
+        overlay.style.display = "block";
+      }
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebar-overlay");
+      if (sidebar.classList.contains("mobile-open")) {
+        sidebar.classList.remove("mobile-open");
+        overlay.style.display = "none";
+      }
+    }
+
+    /* ====================================================================
+       S. TOAST NOTIFICATION UTILITY
+       ==================================================================== */
+    function showToast(title, message, type = "success") {
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+
+      let iconSvg = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      if (type === "error") {
+        iconSvg = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+      } else if (type === "warning") {
+        iconSvg = '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      }
+
+      toast.innerHTML = `
+        <span class="icon" style="color:currentColor; margin-top:2px;">${iconSvg}</span>
+        <div style="flex:1;">
+          <div style="font-weight:700; font-size:0.86rem; color:var(--text-main);">${escapeHtml(title)}</div>
+          <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(message)}</div>
+        </div>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(100%)";
+        toast.style.transition = "all 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    /* ====================================================================
+       T. HELPER FORMATTING FUNCTIONS
+       ==================================================================== */
+    function formatCategoryLabel(catKey) {
+      const labels = {
+        icu_beds: "ICU Beds",
+        oxygen: "Oxygen Equipment",
+        ventilators: "Ventilators",
+        medicines: "Medicines",
+        blood: "Blood Bank",
+        other: "Other Critical"
+      };
+      return labels[catKey] || catKey;
+    }
+
+    function formatTimestamp(isoStr) {
+      if (!isoStr) return "Just now";
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        return "Recent";
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    /* Live Topbar Clock */
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const clockEl = document.getElementById("clock-text");
+      if (clockEl) clockEl.textContent = timeStr;
+    }
+
+    /* ====================================================================
+       U. APP INITIALIZATION
+       ==================================================================== */
+    document.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      renderDashboard();
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // Keyboard escape closes modals
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeResourceModal();
+          closeBedModal();
+          closeDeleteModal();
+          closeResetModal();
+          const drawer = document.getElementById("notif-drawer");
+          if (drawer.classList.contains("open")) toggleNotifDrawer();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
